@@ -63,7 +63,7 @@ function StudentRegister() {
       }
 
       // API call
-      const response = await axios.post('/api/student/register', dataToSend, {
+      const response = await axios.post('http://localhost:5000/api/auth/student/register', dataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -71,9 +71,10 @@ function StudentRegister() {
 
       if (response.data.success) {
         toast.success('Registration successful! Please login.');
-        navigate('/login/student');
+        navigate('http://localhost:5000/api/auth/student/login');
       }
     } catch (error) {
+      console.error('Registration error:', error);
       toast.error(
         error.response?.data?.message || 'Registration failed. Please try again.'
       );
