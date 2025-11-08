@@ -1,5 +1,5 @@
 import express from "express";
-import multer from "../middleware/multer.js"; // your multer setup
+import multer from "../middlewares/multer.js"; // your multer setup
 import {
   registerStudent,
   registerAdmin,

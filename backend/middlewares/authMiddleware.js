@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
-import Student from '../models/student.js';
-import Club from '../models/Club.js';
+
                                                         
 
 export const protectStudent = async (req, res, next) => {

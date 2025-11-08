@@ -4,7 +4,6 @@ import {
   getAllComplaints,
   likeComplaint,
   likeSystem,
-  getStudentProfile,
   updateStudentProfile,
   changeStudentPassword
 } from '../controllers/studentContoller.js';
@@ -29,7 +28,7 @@ router.post('/complaints/:complaintId/like', protectStudent, likeComplaint);
 router.post('/like-system', protectStudent, likeSystem);
 
 // Get student info (profile)
-router.get('/me', protectStudent, getStudentProfile);
+// router.get('/me', protectStudent, getStudentProfile);
 
 // Update student profile (with profile picture)
 router.put('/update-profile', protectStudent, upload.single('profilePic'), updateStudentProfile);
