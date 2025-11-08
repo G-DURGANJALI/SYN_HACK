@@ -295,7 +295,7 @@ function StudentRegister() {
             <p className="text-gray-600">
               Already have an account?{' '}
               <Link
-                to="/login/student"
+                to="/students/login"
                 className="text-blue-600 hover:text-blue-800 font-semibold"
               >
                 Login here
