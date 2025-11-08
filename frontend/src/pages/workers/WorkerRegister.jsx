@@ -61,14 +61,17 @@ function WorkerRegister() {
       }
 
       // API call
-      const response = await axios.post('http://localhost:5000/api/auth/worker/register', dataToSend, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-        withCredentials: true,
-      });
+     const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      const response = await axios.post(
+        `${apiBase}/api/auth/worker/register`,
+        dataToSend,
+        {
+          withCredentials: true,
+        }
+      );
 
-      if (response.status == 201) {
+      console.log('Register response:', response);
+      if (response.status === 201) {
         toast.success('Registration successful');
         navigate('/workers/dashboard');
       }

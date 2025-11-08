@@ -6,7 +6,7 @@ import axios from 'axios';
 function WorkerLogin() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    worker_id: '',
+    worker_user_name: '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
@@ -21,21 +21,27 @@ function WorkerLogin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
-    try {
-      // TODO: Replace with actual API endpoint
-      const response = await axios.post('/api/worker/login', formData);
-      
-      if (response.status === 200) {
-        toast.success('Login successful!');
-        // Store token or user data if needed
-        navigate('/workers/dashboard');
-      }
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
+        try {
+           const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+           const response = await axios.post(
+             `${apiBase}/api/auth/worker/login`,
+             formData,
+             {
+              
+               withCredentials: true, // keep if server sets cookie
+             }
+           );
+     
+           if (response.status === 200) {
+             toast.success('Login successful!');
+             navigate('/workers/dashboard'); // use same route as rest of app
+           }
+         } catch (error) {
+           toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');
+         } finally {
+           setLoading(false);
+         }
+   
   };
 
   return (
@@ -69,17 +75,17 @@ function WorkerLogin() {
           {/* Worker ID */}
           <div className="mb-6">
             <label
-              htmlFor="worker_id"
+              htmlFor="worker_user_name"
               className="block text-gray-700 text-sm font-semibold mb-2"
             >
-              Worker ID
+              User Name
             </label>
             <input
-              id="worker_id"
-              name="worker_id"
+              id="worker_user_name"
+              name="worker_user_name"
               type="text"
-              placeholder="Enter your worker ID"
-              value={formData.worker_id}
+              placeholder="Enter your user name"
+              value={formData.worker_user_name}
               onChange={handleChange}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
@@ -108,13 +114,7 @@ function WorkerLogin() {
 
           {/* Remember Me + Forgot Password */}
           <div className="flex items-center justify-between mb-6">
-            <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="w-4 h-4 text-purple-600 rounded"
-              />
-              <span className="ml-2 text-sm text-gray-600">Remember me</span>
-            </label>
+           
             <Link
               to="/forgot-password/worker"
               className="text-sm text-purple-600 hover:text-purple-800 font-semibold"

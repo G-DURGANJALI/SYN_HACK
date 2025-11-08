@@ -59,17 +59,28 @@ function AdminRegister() {
         dataToSend.append("profilePic", rest.profilePic);
       }
 
-      // API call
-      const response = await axios.post('/api/student/register', dataToSend, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      if (response.data.success) {
-        toast.success('Registration successful! Please login.');
-        navigate('/login/student');
-      }
+           // API call
+           const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+            const response = await axios.post(
+              `${apiBase}/api/auth/admin/register`,
+              dataToSend,
+              {
+                withCredentials: true,
+              }
+            );
+      
+            console.log('Register response:', response);
+            if (response.status === 201) {
+              toast.success('Registration successful');
+              navigate('/hostel-admin/dashboard');
+            }
+          } catch (error) {
+            toast.error(
+              error.response?.data?.message || 'Registration failed. Please try again.'
+            );
+          } finally {
+            setLoading(false);
+          }
     } catch (error) {
       toast.error(
         error.response?.data?.message || 'Registration failed. Please try again.'
@@ -162,12 +173,9 @@ function AdminRegister() {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             >
               <option value="">Select hostel</option>
-              <option value="Hostel A">Hostel A</option>
-              <option value="Hostel B">Hostel B</option>
-              <option value="Hostel C">Hostel C</option>
-              <option value="Hostel D">Hostel D</option>
-              <option value="Hostel E">Hostel E</option>
-              <option value="Hostel F">Hostel F</option>
+              <option value="V.G. Bhide">V.G. Bhide</option>
+              <option value="M.S. Swaminathan">M.S. Swaminathan</option>
+              <option value="Anandibai Joshi">Anandibai Joshi</option>
             </select>
           </div>
 
