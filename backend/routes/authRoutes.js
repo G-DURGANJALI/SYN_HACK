@@ -1,24 +1,25 @@
-import express from 'express';
+import express from "express";
+import multer from "../middleware/multer.js"; // your multer setup
 import {
   registerStudent,
+  registerAdmin,
+  registerWorker,
   loginStudent,
-  registerClub,
-  loginClub,
-  logoutUser
-} from '../controllers/authController.js';
-import jwt from 'jsonwebtoken'
-import upload from "../middlewares/multer.js";
+  loginAdmin,
+  loginWorker,
+  logoutUser,
+} from "../controllers/authController.js";
+
 const router = express.Router();
 
-import Club from '../models/Club.js';
-// Student & Admin
-import Student from '../models/student.js';
-router.post('/student/register',upload.single("profilepic"),registerStudent);
-router.post('/student/login', loginStudent);
+router.post("/student/register", multer.single("profilePic"), registerStudent);
+router.post("/admin/register", multer.single("profilePic"), registerAdmin);
+router.post("/worker/register", multer.single("profilePic"), registerWorker);
 
-// Club
+router.post("/student/login", loginStudent);
+router.post("/admin/login", loginAdmin);
+router.post("/worker/login", loginWorker);
 
-router.post('/club/login', loginClub);
-router.post("/club/register", upload.single("photo"), registerClub);
-router.get("/logout", logoutUser); 
+router.post("/logout", logoutUser);
+
 export default router;
