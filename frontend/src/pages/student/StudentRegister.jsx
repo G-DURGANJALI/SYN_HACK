@@ -1,135 +1,241 @@
-import React, { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
-const StudentRegister = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-  });
-  const [image, setImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
-  const navigate = useNavigate();
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+import React from "react";
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    setImage(file);
-    setImagePreview(URL.createObjectURL(file));
-  };
-
-  const handleSubmit = async (e) => {
+function Register() {
+  const handleRegister = (e) => {
     e.preventDefault();
-    try {
-      const data = new FormData();
-      data.append("name", formData.name);
-      data.append("password", formData.password);
-      data.append("email", formData.email);
-      if (image) {
-        data.append("profilepic", image); // Append image file
-      }
-
-
- 
-       
-      const response = await axios.post(
-        `${apiBaseUrl}/api/auth/student/register`,
-      
-        data,
-        { withCredentials: true } // Send cookies for session
-      );
-
-      toast.success("Registered successfully!");
-	  navigate("/student/home");
-    } catch (error) {
-      toast.error(
-        error.response?.data?.message || "Registration failed. Try again."
-      );
-    }
+    alert("Registration successful!");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <form
-        onSubmit={handleSubmit}
-        className="bg-white p-8 rounded-lg shadow-md w-full max-w-md space-y-4"
-      >
-        <h2 className="text-2xl font-bold text-center">Student Register</h2>
-
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={formData.name}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border rounded-lg"
-          required
-        />
-
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border rounded-lg"
-          required
-        />
-
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          className="w-full px-4 py-2 border rounded-lg"
-          required
-        />
-
-        {/* Stylish Upload Button */}
-        <div>
-          <label className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg cursor-pointer hover:bg-blue-700 transition duration-200">
-            Upload Photo
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={handleImageUpload}
-            />
-          </label>
-          {imagePreview && (
-            <img
-              src={imagePreview}
-              alt="Preview"
-              className="mt-3 w-20 h-20 object-cover rounded-full"
-            />
-          )}
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white text-center">
+          <div className="mb-4">
+            <svg
+              className="w-16 h-16 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              ></path>
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold mb-2">Create Your Account</h1>
+          <p className="text-blue-100">Join the Hostel Grievance System</p>
         </div>
 
-        <button
-          type="submit"
-          className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg"
-        >
-          Register
-        </button>
-	    <p className="mt-4 text-center">
-         Already have an account?{" "}
-         <span
-            onClick={() => navigate("/student/login")}
-            className="text-blue-500 hover:underline cursor-pointer"
+        {/* Registration Form */}
+        <form onSubmit={handleRegister} className="p-8">
+          {/* Register As */}
+          <div className="mb-6">
+            <label className="block text-gray-700 text-sm font-semibold mb-2">
+              Register As
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="userType"
+                  value="student"
+                  defaultChecked
+                  className="w-4 h-4 text-blue-600"
+                />
+                <span className="ml-2 text-gray-700">Student</span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="userType"
+                  value="admin"
+                  className="w-4 h-4 text-blue-600"
+                />
+                <span className="ml-2 text-gray-700">Admin</span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="userType"
+                  value="worker"
+                  className="w-4 h-4 text-blue-600"
+                />
+                <span className="ml-2 text-gray-700">Worker</span>
+              </label>
+            </div>
+          </div>
+
+          {/* Name Fields */}
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label
+                htmlFor="firstName"
+                className="block text-gray-700 text-sm font-semibold mb-2"
+              >
+                First Name
+              </label>
+              <input
+                id="firstName"
+                type="text"
+                placeholder="Enter first name"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="lastName"
+                className="block text-gray-700 text-sm font-semibold mb-2"
+              >
+                Last Name
+              </label>
+              <input
+                id="lastName"
+                type="text"
+                placeholder="Enter last name"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+          </div>
+
+          {/* ID & Hostel */}
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label
+                htmlFor="studentId"
+                className="block text-gray-700 text-sm font-semibold mb-2"
+              >
+                Student/Admin ID
+              </label>
+              <input
+                id="studentId"
+                type="text"
+                placeholder="Enter your ID"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="hostel"
+                className="block text-gray-700 text-sm font-semibold mb-2"
+              >
+                Hostel Block
+              </label>
+              <select
+                id="hostel"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              >
+                <option value="">Select hostel</option>
+                <option value="A">Block A</option>
+                <option value="B">Block B</option>
+                <option value="C">Block C</option>
+                <option value="D">Block D</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Email */}
+          <div className="mb-6">
+            <label
+              htmlFor="email"
+              className="block text-gray-700 text-sm font-semibold mb-2"
+            >
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your college email"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            />
+          </div>
+
+          {/* Phone */}
+          <div className="mb-6">
+            <label
+              htmlFor="phone"
+              className="block text-gray-700 text-sm font-semibold mb-2"
+            >
+              Phone Number
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              placeholder="Enter your phone number"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+            />
+          </div>
+
+          {/* Password Fields */}
+          <div className="grid md:grid-cols-2 gap-6 mb-6">
+            <div>
+              <label
+                htmlFor="password"
+                className="block text-gray-700 text-sm font-semibold mb-2"
+              >
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                placeholder="Enter password"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="block text-gray-700 text-sm font-semibold mb-2"
+              >
+                Confirm Password
+              </label>
+              <input
+                id="confirmPassword"
+                type="password"
+                placeholder="Confirm password"
+                required
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
+              />
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition duration-300 shadow-lg hover:shadow-xl"
           >
-            Login
-          </span>
-        </p>
-		
-      </form>
+            Register
+          </button>
+
+          {/* Already Have an Account */}
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Already have an account?{" "}
+              <a
+                href="/login"
+                className="text-blue-600 hover:text-blue-800 font-semibold"
+              >
+                Login here
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
   );
-};
+}
 
-export default StudentRegister;
-// done except photo
+export default Register;

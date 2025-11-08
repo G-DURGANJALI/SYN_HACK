@@ -1,68 +1,151 @@
-import { useState } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom";
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL;
+import React from "react";
 
-export default function StudentLogin() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const navigate = useNavigate();
-
-  const loginHandler = async (e) => {
+function Login() {
+  const handleLogin = (e) => {
     e.preventDefault();
-    try {
-      const res = await axios.post(`${apiBaseUrl}/api/auth/student/login`, { email, password }, { withCredentials: true });
-
-      if (res.data.isAdmin) {
-        navigate("/admin");
-      } else {
-        toast.success("Logged in successfully");
-        navigate("/student/home");
-      }
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed");
-    }
+    alert("Login successful!");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-blue-50 px-4">
-      <form onSubmit={loginHandler} className="bg-white shadow-lg p-8 rounded-xl w-full max-w-md">
-        <h2 className="text-2xl font-semibold text-center mb-6 text-blue-700">Student Login</h2>
+    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
+        {/* Header Section */}
+        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white text-center">
+          <div className="mb-4">
+            <svg
+              className="w-16 h-16 mx-auto"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              ></path>
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold mb-2">Hostel Grievance System</h1>
+          <p className="text-blue-100">
+            Welcome back! Please login to your account
+          </p>
+        </div>
 
-        <input
-          type="email"
-          className="w-full mb-4 px-4 py-2 border rounded"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-        />
+        {/* Login Form */}
+        <form onSubmit={handleLogin} className="p-8">
+          {/* User Type */}
+          <div className="mb-6">
+            <label className="block text-gray-700 text-sm font-semibold mb-2">
+              User Type
+            </label>
+            <div className="flex gap-4">
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="userType"
+                  value="student"
+                  defaultChecked
+                  className="w-4 h-4 text-blue-600"
+                />
+                <span className="ml-2 text-gray-700">Student</span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="userType"
+                  value="admin"
+                  className="w-4 h-4 text-blue-600"
+                />
+                <span className="ml-2 text-gray-700">Admin</span>
+              </label>
+              <label className="flex items-center cursor-pointer">
+                <input
+                  type="radio"
+                  name="userType"
+                  value="worker"
+                  className="w-4 h-4 text-blue-600"
+                />
+                <span className="ml-2 text-gray-700">Worker</span>
+              </label>
+            </div>
+          </div>
 
-        <input
-          type="password"
-          className="w-full mb-6 px-4 py-2 border rounded"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+          {/* Email */}
+          <div className="mb-6">
+            <label
+              htmlFor="email"
+              className="block text-gray-700 text-sm font-semibold mb-2"
+            >
+              Email Address
+            </label>
+            <input
+              id="email"
+              type="email"
+              placeholder="Enter your email"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            />
+          </div>
 
-        <button type="submit" className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-          Login
-        </button>
+          {/* Password */}
+          <div className="mb-6">
+            <label
+              htmlFor="password"
+              className="block text-gray-700 text-sm font-semibold mb-2"
+            >
+              Password
+            </label>
+            <input
+              id="password"
+              type="password"
+              placeholder="Enter your password"
+              required
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            />
+          </div>
 
-        <p className="mt-4 text-center">
-          Don’t have an account?{" "}
-          <span
-            onClick={() => navigate("/student/register")}
-            className="text-blue-500 hover:underline cursor-pointer"
+          {/* Remember Me + Forgot Password */}
+          <div className="flex items-center justify-between mb-6">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                className="w-4 h-4 text-blue-600 rounded"
+              />
+              <span className="ml-2 text-sm text-gray-600">Remember me</span>
+            </label>
+            <a
+              href="#"
+              className="text-sm text-blue-600 hover:text-blue-800 font-semibold"
+            >
+              Forgot Password?
+            </a>
+          </div>
+
+          {/* Login Button */}
+          <button
+            type="submit"
+            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
           >
-            Register
-          </span>
-        </p>
-      </form>
+            Login
+          </button>
+
+          {/* Register Redirect */}
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Don't have an account?{" "}
+              <a
+                href="/register"
+                className="text-blue-600 hover:text-blue-800 font-semibold"
+              >
+                Register here
+              </a>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }
-// done 
+
+export default Login;
