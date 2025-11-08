@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 
 const workerSchema = new mongoose.Schema({
+  worker_id: { type: String, required: true },
   name: { type: String, required: true },
   password: { type: String, required: true },
   profilePic: { type: String },
