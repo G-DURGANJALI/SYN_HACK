@@ -22,14 +22,20 @@ function StudentLogin() {
     e.preventDefault();
     setLoading(true);
 
-    try {
-      // TODO: Replace with actual API endpoint
-      const response = await axios.post('/api/student/login', formData);
-      
-      if (response.data.success) {
+        try {
+      const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      const response = await axios.post(
+        `${apiBase}/api/auth/student/login`,
+        formData,
+        {
+         
+          withCredentials: true, // keep if server sets cookie
+        }
+      );
+
+      if (response.status === 200) {
         toast.success('Login successful!');
-        // Store token or user data if needed
-        navigate('/student/dashboard');
+        navigate('/students/dashboard'); // use same route as rest of app
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');
@@ -115,11 +121,6 @@ function StudentLogin() {
           {/* Remember Me + Forgot Password */}
           <div className="flex items-center justify-between mb-6">
             <label className="flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                className="w-4 h-4 text-blue-600 rounded"
-              />
-              <span className="ml-2 text-sm text-gray-600">Remember me</span>
             </label>
             <Link
               to="/forgot-password/student"

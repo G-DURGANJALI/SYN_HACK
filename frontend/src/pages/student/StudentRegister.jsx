@@ -30,7 +30,7 @@ function StudentRegister() {
     e.preventDefault();
     setLoading(true);
 
-    // Validate passwords match
+ 
     if (formData.password !== formData.confirmPassword) {
       toast.error('Passwords do not match!');
       setLoading(false);
@@ -67,12 +67,14 @@ function StudentRegister() {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        withCredentials: true,
       });
 
-      if (response.data.success) {
-        toast.success('Registration successful! Please login.');
-        navigate('http://localhost:5000/api/auth/student/login');
-      }
+      // navigate on successful creation (backend returns 201)
+      if (response.status === 201 || response.data?.message?.toLowerCase().includes('registered')) {
+        toast.success('Registration successful!');
+        navigate('/students/dashboard');
+      } 
     } catch (error) {
       console.error('Registration error:', error);
       toast.error(

@@ -26,10 +26,10 @@ function WorkerLogin() {
       // TODO: Replace with actual API endpoint
       const response = await axios.post('/api/worker/login', formData);
       
-      if (response.data.success) {
+      if (response.status === 200) {
         toast.success('Login successful!');
         // Store token or user data if needed
-        navigate('/worker/dashboard');
+        navigate('/workers/dashboard');
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');

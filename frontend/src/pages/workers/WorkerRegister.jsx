@@ -6,7 +6,7 @@ import axios from 'axios';
 function WorkerRegister() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    worker_id: '',
+    worker_user_name: '',
     name: '',
     password: '',
     confirmPassword: '',
@@ -61,15 +61,16 @@ function WorkerRegister() {
       }
 
       // API call
-      const response = await axios.post('/api/student/register', dataToSend, {
+      const response = await axios.post('http://localhost:5000/api/auth/worker/register', dataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
+        withCredentials: true,
       });
 
-      if (response.data.success) {
-        toast.success('Registration successful! Please login.');
-        navigate('/login/student');
+      if (response.status == 201) {
+        toast.success('Registration successful');
+        navigate('/workers/dashboard');
       }
     } catch (error) {
       toast.error(
@@ -106,25 +107,26 @@ function WorkerRegister() {
 
         {/* Registration Form */}
         <form onSubmit={handleSubmit} className="p-8">
-          {/* Worker ID */}
+          {/* Worker user name */}
           <div className="mb-6">
             <label
-              htmlFor="worker_id"
+              htmlFor="worker_user_name"
               className="block text-gray-700 text-sm font-semibold mb-2"
             >
-              Worker ID
+             User Name
             </label>
             <input
-              id="worker_id"
-              name="worker_id"
+              id="worker_user_name"
+              name="worker_user_name"
               type="text"
-              placeholder="Enter your worker ID"
-              value={formData.worker_id}
+              placeholder="Create your User name"
+              value={formData.worker_user_name}
               onChange={handleChange}
               required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition"
             />
           </div>
+
 
           {/* Name */}
           <div className="mb-6">
