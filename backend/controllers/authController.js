@@ -111,29 +111,53 @@ export const loginStudent = async (req, res) => {
 // ----------------------------- Admin ---------------------------------
 
 export const registerAdmin = async (req, res) => {
-  const { name, email, password, Hostel_Name } = req.body;
-
   try {
+    const { name, email, password, contact_Number, Hostel_Name } = req.body;
+
+    // Validate required fields
+    if (!name || !email || !password || !contact_Number || !Hostel_Name) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // Check if admin already exists
     const existingAdmin = await Admin.findOne({ email });
-    if (existingAdmin)
+    if (existingAdmin) {
       return res.status(400).json({ message: "Admin already exists" });
+    }
 
+    // Hash password securely
     const hashedPassword = await bcrypt.hash(password, 10);
-    let profilePic = "";
-    if (req.file) profilePic = req.file.path;
 
+    // Handle optional profile picture
+    let profilePic = "";
+    if (req.file && req.file.path) {
+      profilePic = req.file.path;
+    }
+
+    // Create new admin document
     const newAdmin = await Admin.create({
       name,
       email,
       password: hashedPassword,
+      contact_Number,
       Hostel_Name,
       profilePic,
     });
 
+    // Generate token
     generateToken(res, newAdmin._id, "admin");
-    res
-      .status(201)
-      .json({ message: "Admin registered successfully", admin: newAdmin });
+
+    res.status(201).json({
+      message: "Admin registered successfully",
+      admin: {
+        _id: newAdmin._id,
+        name: newAdmin.name,
+        email: newAdmin.email,
+        Hostel_Name: newAdmin.Hostel_Name,
+        contact_Number: newAdmin.contact_Number,
+        profilePic: newAdmin.profilePic || "",
+      },
+    });
   } catch (error) {
     console.error("Error registering admin:", error);
     res.status(500).json({ message: "Server error" });
@@ -141,24 +165,46 @@ export const registerAdmin = async (req, res) => {
 };
 
 export const loginAdmin = async (req, res) => {
-  const { email, password } = req.body;
-
   try {
+    const { email, password } = req.body;
+
+    // Check if email & password provided
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password are required" });
+    }
+
+    // Find admin
     const admin = await Admin.findOne({ email });
-    if (!admin)
+    if (!admin) {
       return res.status(404).json({ message: "Admin not found" });
+    }
 
+    // Compare password
     const isMatch = await bcrypt.compare(password, admin.password);
-    if (!isMatch)
+    if (!isMatch) {
       return res.status(401).json({ message: "Invalid credentials" });
+    }
 
+    // Generate JWT token cookie
     generateToken(res, admin._id, "admin");
-    res.status(200).json({ message: "Admin login success", admin });
+
+    res.status(200).json({
+      message: "Admin login success",
+      admin: {
+        _id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        Hostel_Name: admin.Hostel_Name,
+        contact_Number: admin.contact_Number,
+        profilePic: admin.profilePic || "",
+      },
+    });
   } catch (error) {
     console.error("Error logging in admin:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // ----------------------------- Worker ---------------------------------
 
