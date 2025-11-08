@@ -32,6 +32,10 @@ app.use('/api/students', studentRoutes);
 app.use('/api/hostelAdmins', hostelAdminRoutes);
 app.use('/api/workers', workerRoutes);
 const PORT = process.env.PORT || 5000;
+
+// Initialize scheduled jobs
+import "./jobs/autoAssignJob.js";
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
