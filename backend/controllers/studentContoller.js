@@ -1,98 +1,150 @@
 import Student from '../models/student.js';
-import Blog from '../models/Blog.js';
+import Complaint from '../models/Complaint.js';
 import cloudinary from 'cloudinary';
-import Club from '../models/Club.js'
-import bcrypt from "bcryptjs";
+import bcrypt from 'bcryptjs';
 
-//  Logout Student
+// Logout Student
 export const logoutStudent = (req, res) => {
   res.cookie('token', '', { maxAge: 1 });
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
-// 1. Get all approved clubs
-export const getAllApprovedClubs = async (req, res) => {
+// Create a new complaint
+export const createComplaint = async (req, res) => {
   try {
-    const clubs = await Club.find({ isApproved: true }).select('-password');
-    res.status(200).json(clubs);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch clubs' });
-  }
-};
-// populate them according to new date 
-// 2. Get all blogs of a particular club
-export const getallblogs = async (req, res) => {
-  try {
-   
-    const blogs = await Blog.find({  status: 'approved'}).sort({ createdAt: -1 });
-    res.status(200).json(blogs);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch club blogs' });
-  }
-};
-export const getclubprofile=async(req,res)=>{
-  try{
-    const { clubId } = req.params; 
-    const club = await Club.findById(clubId).select('-password');
+    const { title, description, category, priority } = req.body;
 
-    if (!club) {
-      return res.status(404).json({ message: 'Club not found' });
+    if (!title || !description) {
+      return res.status(400).json({ message: 'Title and description are required' });
     }
 
-    res.status(200).json(club);
-  }catch(err)
-  {
-    res.status(500).json({ message: 'Failed to fetch club info ' });
-  }
-}
+    const complaintData = {
+      title,
+      description,
+      createdBy: req.student._id,
+      status: 'open',
+    };
 
-// 3. Get blogs based on section
-export const getBlogsBySection = async (req, res) => {
-  try {
-    const { section } = req.params;
+    if (category) complaintData.category = category;
+    if (priority) complaintData.priority = priority;
 
-    const validSections = ["Intern", "Academic Resources", "Tech Stacks", "Experience", "Club"];
-    if (!validSections.includes(section)) {
-      return res.status(400).json({ message: "Invalid blog section" });
-    }
+    // optional: support an image upload for complaint
+    if (req.file) complaintData.attachment = req.file.path;
 
-    const blogs = await Blog.find({ section, status: "approved" })
-      .sort({ createdAt: -1 })
-     
-
-    res.status(200).json(blogs);
+    const complaint = await Complaint.create(complaintData);
+    res.status(201).json({ success: true, complaint });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch section blogs' });
+    console.error('createComplaint error:', error);
+    res.status(500).json({ success: false, message: 'Failed to create complaint' });
   }
 };
 
-// 4. Update profile (name or photo)
+// Get all complaints (own complaints by default; ?all=true to get all complaints)
+export const getAllComplaints = async (req, res) => {
+  try {
+    const showAll = req.query.all === 'true';
+    const filter = showAll ? {} : { createdBy: req.student._id };
+
+    const complaints = await Complaint.find(filter)
+      .populate('createdBy', 'name email roomNo')     // adjust fields to your Student schema
+      .populate('assignedTo', 'name email')            // worker details if assigned
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, complaints });
+  } catch (error) {
+    console.error('getAllComplaints error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch complaints' });
+  }
+};
+
+// Like or unlike a complaint (toggle)
+export const likeComplaint = async (req, res) => {
+  try {
+    const { complaintId } = req.params;
+    if (!complaintId) return res.status(400).json({ message: 'Complaint ID required' });
+
+    const complaint = await Complaint.findById(complaintId);
+    if (!complaint) return res.status(404).json({ message: 'Complaint not found' });
+
+    const studentIdStr = req.student._id.toString();
+    complaint.likedBy = complaint.likedBy || [];
+
+    const alreadyLiked = complaint.likedBy.some(id => id.toString() === studentIdStr);
+
+    if (alreadyLiked) {
+      complaint.likedBy = complaint.likedBy.filter(id => id.toString() !== studentIdStr);
+      complaint.likes = Math.max(0, (complaint.likes || 0) - 1);
+      await complaint.save();
+      return res.status(200).json({ success: true, message: 'Complaint unliked', likes: complaint.likes });
+    } else {
+      complaint.likedBy.push(req.student._id);
+      complaint.likes = (complaint.likes || 0) + 1;
+      await complaint.save();
+      return res.status(200).json({ success: true, message: 'Complaint liked', likes: complaint.likes });
+    }
+  } catch (error) {
+    console.error('likeComplaint error:', error);
+    res.status(500).json({ success: false, message: 'Error toggling like' });
+  }
+};
+
+// Generic "like the system" feedback (simple)
+export const likeSystem = async (req, res) => {
+  try {
+    // Optional: persist to DB if you have a Feedback model; for now just acknowledge
+    return res.status(200).json({ success: true, message: 'Thanks for liking the Hostel Management System!' });
+  } catch (error) {
+    console.error('likeSystem error:', error);
+    res.status(500).json({ success: false, message: 'Failed to register like' });
+  }
+};
+
+// Get student profile/info
+export const getStudentInfo = async (req, res) => {
+  try {
+    const student = await Student.findById(req.student._id).select('-password');
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+    res.status(200).json({ success: true, student });
+  } catch (error) {
+    console.error('getStudentInfo error:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch student info' });
+  }
+};
+
+// Update profile (name, email, profilePic)
 export const updateStudentProfile = async (req, res) => {
   try {
     const student = await Student.findById(req.student._id);
-
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
-    const { name } = req.body;
-
+    const { name, email, roomNo } = req.body;
     if (name) student.name = name;
+    if (email) student.email = email;
+    if (roomNo) student.roomNo = roomNo; // optional field
 
+    // handle profile picture (upload via multer -> req.file.path)
     if (req.file) {
-      // Delete old image if exists
+      // If previously stored on cloudinary, remove. This assumes profilePic stores full cloud path.
       if (student.profilePic) {
-        const publicId = student.profilePic.split('/').pop().split('.')[0];
-        await cloudinary.uploader.destroy(`collegeBlogs/${publicId}`);
+        try {
+          const publicId = student.profilePic.split('/').pop().split('.')[0];
+          await cloudinary.uploader.destroy(`hostel/${publicId}`);
+        } catch (e) {
+          console.warn('cloudinary delete warning:', e.message);
+        }
       }
       student.profilePic = req.file.path;
     }
-    
+
     await student.save();
-    res.status(200).json({ message: 'Profile updated', student });
+    res.status(200).json({ success: true, message: 'Profile updated', student });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to update profile' });
+    console.error('updateStudentProfile error:', error);
+    res.status(500).json({ success: false, message: 'Failed to update profile' });
   }
 };
 
+// Change student password (uses bcrypt compare & hash)
 export const changeStudentPassword = async (req, res) => {
   try {
     const studentId = req.student._id;
@@ -102,13 +154,8 @@ export const changeStudentPassword = async (req, res) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    const student = await Student.findById(studentId);
-    if (!student) {
-      return res.status(404).json({ message: 'Student not found' });
-    }
-
-    console.log("Current:", currentPassword);
-    console.log("Student Hashed Password:", student.password);
+    const student = await Student.findById(studentId).select('+password');
+    if (!student) return res.status(404).json({ message: 'Student not found' });
 
     const isMatch = await bcrypt.compare(currentPassword, student.password);
     if (!isMatch) {
@@ -119,131 +166,9 @@ export const changeStudentPassword = async (req, res) => {
     student.password = hashedPassword;
     await student.save();
 
-    return res.status(200).json({ message: 'Password updated successfully' });
+    return res.status(200).json({ success: true, message: 'Password updated successfully' });
   } catch (error) {
-    console.error("Error in changeStudentPassword:", error);
-    return res.status(500).json({ message: 'Error changing password' });
-  }
-};
-
-
-// 5. Get liked blogs
-export const getLikedBlogs = async (req, res) => {
-  try {
-    const student = await Student.findById(req.student._id).populate({
-      path: 'likedBlogs',
-      match: { status: 'approved' },
-    });
-    res.status(200).json(student.likedBlogs);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch liked blogs' });
-  }
-};
-
-// 6. Get student info
-export const getStudentInfo = async (req, res) => {
-  try {
-    const student = await Student.findById(req.student._id).select('-password');
-    res.status(200).json(student);
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch student info' });
-  }
-};
-// 7. Like or Unlike a blog
-export const likeOrUnlikeBlog = async (req, res) => {
-  try {
-    const { blogId } = req.params;
-    const blog = await Blog.findById(blogId);
-
-    if (!blog) return res.status(404).json({ message: 'Blog not found' });
-    const student = await Student.findById(req.student._id);
-    const hasLiked = blog.likes.includes(student._id);
-
-    if (!hasLiked) {
-      blog.likes.push(student._id);
-      student.likedBlogs.push(blog._id);
-      await blog.save();
-      await student.save();
-      return res.status(200).json({ message: 'Blog liked' });
-    } else {
-      blog.likes = blog.likes.filter(id => id.toString() !== student._id.toString());
-      student.likedBlogs = student.likedBlogs.filter(id => id.toString() !== blog._id.toString());
-      await blog.save();
-      await student.save();
-      return res.status(200).json({ message: 'Blog unliked' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Error liking/unliking blog' });
-  }
-};
-
-// 8. Comment on a blog
-export const commentOnBlog = async (req, res) => {
-  try {
-
-    const { blogId } = req.params;
-    
-    const  {comment}  = req.body;
-     
-    if (!comment || comment.trim() === "") {
-      return res.status(400).json({ message: 'Comment cannot be empty' });
-    }
-
-    const blog = await Blog.findById(blogId);
-    if (!blog) return res.status(404).json({ message: 'Blog not found' });
-
-    blog.comments.push({
-      student: req.student._id,
-      comment
-    });
-
-    await blog.save();
-    res.status(200).json({ message: 'Comment added' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-export const createBlog = async (req, res) => {
-  try {
-    const { title, description,section } = req.body;
-    if(!title|| !description||!section)
-      {
-        return res.status(400).json({ message: ' Complete details are  missing ' });
-      }
-
-    const coverimg = req.files['coverimg']?.[0]?.path || null;
-    const photos = req.files['photos']?.map((file) => file.path) || [];
-    
-    if (!coverimg) {
-      return res.status(400).json({ message: 'Cover image is required' });
-    }
-   
-
-    const newBlog = await Blog.create({
-      title,
-      description,
-      coverimg,
-      photos,
-    
-      section: section,
-      authorType: 'Student',
-      studentId:req.student._id,
-      
-      status: 'pending', 
-    });
-
-    res.status(201).json({
-      success: true,
-      message: 'Blog created successfully',
-     
-    });
-  } catch (error) {
-    console.error('Error creating blog:', error);
-    res.status(500).json({
-      success: false,
-      message: 'Failed to create blog',
-      error: error.message,
-    });
+    console.error('changeStudentPassword error:', error);
+    return res.status(500).json({ success: false, message: 'Error changing password' });
   }
 };

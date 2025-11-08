@@ -1,38 +1,40 @@
 import express from 'express';
 import {
-
-  logoutStudent,
-  getAllApprovedClubs,
-  getallblogs,
-  getBlogsBySection,
+  createComplaint,
+  getAllComplaints,
+  likeComplaint,
+  likeSystem,
+  getStudentProfile,
   updateStudentProfile,
-  getLikedBlogs,
-  getStudentInfo,
-  likeOrUnlikeBlog,
-  commentOnBlog,
-  getclubprofile,createBlog,
   changeStudentPassword
-  
 } from '../controllers/studentContoller.js';
 
 import { protectStudent } from '../middlewares/authMiddleware.js';
 import upload from '../middlewares/multer.js';
 
 const router = express.Router();
-router.get('/clubs', protectStudent, getAllApprovedClubs);// done
-router.get('/blogs', protectStudent, getallblogs);  
-router.get('/clubs/:clubId/profile', protectStudent, getclubprofile);
-router.get('/blogs/section/:section', protectStudent, getBlogsBySection);
+
+// 🧑‍🎓 Student Routes
+
+// Create a new complaint
+router.post('/complaints', protectStudent, createComplaint);
+
+// Get all complaints (optionally filter by ?all=true)
+router.get('/complaints', protectStudent, getAllComplaints);
+
+// Like or unlike a complaint
+router.post('/complaints/:complaintId/like', protectStudent, likeComplaint);
+
+// Like the system / send feedback
+router.post('/like-system', protectStudent, likeSystem);
+
+// Get student info (profile)
+router.get('/me', protectStudent, getStudentProfile);
+
+// Update student profile (with profile picture)
 router.put('/update-profile', protectStudent, upload.single('profilePic'), updateStudentProfile);
+
+// Change student password
 router.put('/change-password', protectStudent, changeStudentPassword);
-router.get('/liked-blogs', protectStudent, getLikedBlogs);
-router.get('/me', protectStudent, getStudentInfo);
-router.post('/like/:blogId', protectStudent, likeOrUnlikeBlog);
-router.post('/comment/:blogId', protectStudent, commentOnBlog);
-router.post('/create-blog', upload.fields([
-    { name: 'coverimg', maxCount: 1 },
-    { name: 'photos', maxCount: 20 },
- 
-  ]),protectStudent,createBlog);
 
 export default router;
