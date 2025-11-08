@@ -1,6 +1,5 @@
 
 import Blog from '../models/Blog.js';
-import Club from '../models/Club.js';
 import Student from '../models/Student.js';
 
 export const allClubs = async (req, res) => {
