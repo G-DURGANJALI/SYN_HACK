@@ -3,7 +3,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import NotFound from './pages/NotFound';
-
+import StudentRoutes from './routes/StudentRoutes';
 
 
 import { ToastContainer } from 'react-toastify'
@@ -18,11 +18,11 @@ export default function App() {
       <ToastContainer position="top-right" autoClose={3000} />
 
       <Routes>
-
+      
         
 
-        
 
+        <Route path="students/*" element={<StudentRoutes />} />
         <Route path="*" element={<NotFound />} />
 
       </Routes>
