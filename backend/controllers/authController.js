@@ -163,10 +163,10 @@ export const loginAdmin = async (req, res) => {
 // ----------------------------- Worker ---------------------------------
 
 export const registerWorker = async (req, res) => {
-  const { worker_id, name, password, role, contact_Number } = req.body;
+  const { worker_user_name, name, password, role, contact_Number } = req.body;
 
   try {
-    const existingWorker = await Worker.findOne({ worker_id });
+    const existingWorker = await Worker.findOne({ worker_user_name });
     if (existingWorker)
       return res.status(400).json({ message: "Worker already exists" });
 
@@ -175,7 +175,7 @@ export const registerWorker = async (req, res) => {
     if (req.file) profilePic = req.file.path;
 
     const newWorker = await Worker.create({
-      worker_id,
+      worker_user_name,
       name,
       password: hashedPassword,
       role,
@@ -184,9 +184,11 @@ export const registerWorker = async (req, res) => {
     });
 
     generateToken(res, newWorker._id, "worker");
-    res
-      .status(201)
-      .json({ message: "Worker registered successfully", worker: newWorker });
+
+    res.status(201).json({
+      message: "Worker registered successfully",
+      worker: newWorker,
+    });
   } catch (error) {
     console.error("Error registering worker:", error);
     res.status(500).json({ message: "Server error" });
@@ -194,10 +196,10 @@ export const registerWorker = async (req, res) => {
 };
 
 export const loginWorker = async (req, res) => {
-  const { worker_id, password } = req.body;
+  const { worker_user_name, password } = req.body;
 
   try {
-    const worker = await Worker.findOne({ worker_id });
+    const worker = await Worker.findOne({ worker_user_name });
     if (!worker)
       return res.status(404).json({ message: "Worker not found" });
 
@@ -212,6 +214,7 @@ export const loginWorker = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
 
 // ----------------------------- Logout (optional reuse) ---------------------------------
 export const logoutUser = async (req, res) => {
