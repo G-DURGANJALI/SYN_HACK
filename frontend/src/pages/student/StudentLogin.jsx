@@ -143,7 +143,7 @@ function StudentLogin() {
             <p className="text-gray-600">
               Don't have an account?{' '}
               <Link
-                to="/register/student"
+                to="/students/register"
                 className="text-blue-600 hover:text-blue-800 font-semibold"
               >
                 Register here

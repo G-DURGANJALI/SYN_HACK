@@ -7,11 +7,11 @@ function RoleSelection() {
   const handleRoleSelection = (role) => {
     // Navigate to the appropriate login page based on role
     if (role === 'student') {
-      navigate('/login/student');
+      navigate('students/login');
     } else if (role === 'admin') {
-      navigate('/login/admin');
+      navigate('hostel-admin/login');
     } else if (role === 'worker') {
-      navigate('/login/worker');
+      navigate('workers/login');
     }
   };
 

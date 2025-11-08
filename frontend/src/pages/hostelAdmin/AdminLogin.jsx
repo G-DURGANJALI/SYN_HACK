@@ -137,7 +137,7 @@ function AdminLogin() {
             <p className="text-gray-600">
               Don't have an account?{' '}
               <Link
-                to="/register/admin"
+                to="/hostel-admin/register"
                 className="text-indigo-600 hover:text-indigo-800 font-semibold"
               >
                 Register here

@@ -6,6 +6,7 @@ import NotFound from './pages/NotFound';
 import StudentRoutes from './routes/StudentRoutes';
 import HostelAdminRoutes from './routes/HostelAdminRoutes'; 
 import WorkerRoutes from './routes/WorkerRoutes';
+import RoleSelection from './pages/RoleSelection';
 
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -22,6 +23,7 @@ export default function App() {
         <Route path="hostel-admin/*" element={<HostelAdminRoutes />} />
         <Route path="students/*" element={<StudentRoutes />} />
         <Route path="workers/*" element={<WorkerRoutes />} />
+        <Route path="/" element={<RoleSelection />} />
         <Route path="*" element={<NotFound />} />
 
       </Routes>

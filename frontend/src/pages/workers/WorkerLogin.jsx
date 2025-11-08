@@ -137,7 +137,7 @@ function WorkerLogin() {
             <p className="text-gray-600">
               Don't have an account?{' '}
               <Link
-                to="/register/worker"
+                to="/workers/register"
                 className="text-purple-600 hover:text-purple-800 font-semibold"
               >
                 Register here
