@@ -194,12 +194,9 @@ function StudentRegister() {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               >
                 <option value="">Select hostel</option>
-                <option value="Hostel A">Hostel A</option>
-                <option value="Hostel B">Hostel B</option>
-                <option value="Hostel C">Hostel C</option>
-                <option value="Hostel D">Hostel D</option>
-                <option value="Hostel E">Hostel E</option>
-                <option value="Hostel F">Hostel F</option>
+                <option value="V.G. Bhide">V.G. Bhide</option>
+                <option value="M.S. Swaminathan">M.S. Swaminathan</option>
+                <option value="Anandibai Joshi">Anandibai Joshi</option>
               </select>
             </div>
 
@@ -347,7 +344,7 @@ function StudentRegister() {
             <p className="text-gray-600">
               Already have an account?{' '}
               <Link
-                to="/login/student"
+                to="/students/login"
                 className="text-blue-600 hover:text-blue-800 font-semibold"
               >
                 Login here
