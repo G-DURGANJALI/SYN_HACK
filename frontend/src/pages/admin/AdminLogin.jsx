@@ -3,10 +3,10 @@ import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-function StudentLogin() {
+function AdminLogin() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    student_id: '',
+    email: '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
@@ -24,12 +24,12 @@ function StudentLogin() {
 
     try {
       // TODO: Replace with actual API endpoint
-      const response = await axios.post('/api/student/login', formData);
+      const response = await axios.post('/api/admin/login', formData);
       
       if (response.data.success) {
         toast.success('Login successful!');
         // Store token or user data if needed
-        navigate('/student/dashboard');
+        navigate('/admin/dashboard');
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.');
@@ -39,10 +39,10 @@ function StudentLogin() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div className="bg-gradient-to-br from-indigo-50 to-purple-100 min-h-screen flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white text-center">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white text-center">
           <div className="mb-4">
             <svg
               className="w-16 h-16 mx-auto"
@@ -54,41 +54,35 @@ function StudentLogin() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M12 14l9-5-9-5-9 5 9 5z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Student Login</h1>
-          <p className="text-blue-100">
+          <h1 className="text-3xl font-bold mb-2">Admin Login</h1>
+          <p className="text-indigo-100">
             Welcome back! Please login to your account
           </p>
         </div>
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="p-8">
-          {/* Student ID */}
+          {/* Email */}
           <div className="mb-6">
             <label
-              htmlFor="student_id"
+              htmlFor="email"
               className="block text-gray-700 text-sm font-semibold mb-2"
             >
-              Student ID
+              Email Address
             </label>
             <input
-              id="student_id"
-              name="student_id"
-              type="text"
-              placeholder="Enter your student ID"
-              value={formData.student_id}
+              id="email"
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             />
           </div>
 
@@ -108,7 +102,7 @@ function StudentLogin() {
               value={formData.password}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             />
           </div>
 
@@ -117,13 +111,13 @@ function StudentLogin() {
             <label className="flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                className="w-4 h-4 text-blue-600 rounded"
+                className="w-4 h-4 text-indigo-600 rounded"
               />
               <span className="ml-2 text-sm text-gray-600">Remember me</span>
             </label>
             <Link
-              to="/forgot-password/student"
-              className="text-sm text-blue-600 hover:text-blue-800 font-semibold"
+              to="/forgot-password/admin"
+              className="text-sm text-indigo-600 hover:text-indigo-800 font-semibold"
             >
               Forgot Password?
             </Link>
@@ -133,7 +127,7 @@ function StudentLogin() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
@@ -143,8 +137,8 @@ function StudentLogin() {
             <p className="text-gray-600">
               Don't have an account?{' '}
               <Link
-                to="/register/student"
-                className="text-blue-600 hover:text-blue-800 font-semibold"
+                to="/register/admin"
+                className="text-indigo-600 hover:text-indigo-800 font-semibold"
               >
                 Register here
               </Link>
@@ -166,4 +160,5 @@ function StudentLogin() {
   );
 }
 
-export default StudentLogin;
+export default AdminLogin;
+

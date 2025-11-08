@@ -3,17 +3,14 @@ import { useNavigate, Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
 
-function StudentRegister() {
+function AdminRegister() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
     password: '',
     confirmPassword: '',
-    student_id: '',
     Hostel_Name: '',
-    Room_Number: '',
-    contact_Number: '',
     profilePic: '',
   });
   const [loading, setLoading] = useState(false);
@@ -47,11 +44,11 @@ function StudentRegister() {
       const { confirmPassword, ...dataToSend } = formData;
       
       // TODO: Replace with actual API endpoint
-      const response = await axios.post('/api/student/register', dataToSend);
+      const response = await axios.post('/api/admin/register', dataToSend);
       
       if (response.data.success) {
         toast.success('Registration successful! Please login.');
-        navigate('/login/student');
+        navigate('/login/admin');
       }
     } catch (error) {
       toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
@@ -61,10 +58,10 @@ function StudentRegister() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
+    <div className="bg-gradient-to-br from-indigo-50 to-purple-100 min-h-screen flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl overflow-hidden my-8">
         {/* Header Section */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-white text-center">
+        <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-8 text-white text-center">
           <div className="mb-4">
             <svg
               className="w-16 h-16 mx-auto"
@@ -76,18 +73,12 @@ function StudentRegister() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth="2"
-                d="M12 14l9-5-9-5-9 5 9 5z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"
               />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold mb-2">Student Registration</h1>
-          <p className="text-blue-100">Join as a student in the Hostel Grievance System</p>
+          <h1 className="text-3xl font-bold mb-2">Admin Registration</h1>
+          <p className="text-indigo-100">Join as an admin in the Hostel Grievance System</p>
         </div>
 
         {/* Registration Form */}
@@ -108,27 +99,7 @@ function StudentRegister() {
               value={formData.name}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-            />
-          </div>
-
-          {/* Student ID */}
-          <div className="mb-6">
-            <label
-              htmlFor="student_id"
-              className="block text-gray-700 text-sm font-semibold mb-2"
-            >
-              Student ID
-            </label>
-            <input
-              id="student_id"
-              name="student_id"
-              type="text"
-              placeholder="Enter your student ID"
-              value={formData.student_id}
-              onChange={handleChange}
-              required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             />
           </div>
 
@@ -144,79 +115,38 @@ function StudentRegister() {
               id="email"
               name="email"
               type="email"
-              placeholder="Enter your college email"
+              placeholder="Enter your email"
               value={formData.email}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             />
           </div>
 
-          {/* Hostel Name & Room Number */}
-          <div className="grid md:grid-cols-2 gap-6 mb-6">
-            <div>
-              <label
-                htmlFor="Hostel_Name"
-                className="block text-gray-700 text-sm font-semibold mb-2"
-              >
-                Hostel Name
-              </label>
-              <select
-                id="Hostel_Name"
-                name="Hostel_Name"
-                value={formData.Hostel_Name}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              >
-                <option value="">Select hostel</option>
-                <option value="Hostel A">Hostel A</option>
-                <option value="Hostel B">Hostel B</option>
-                <option value="Hostel C">Hostel C</option>
-                <option value="Hostel D">Hostel D</option>
-                <option value="Hostel E">Hostel E</option>
-                <option value="Hostel F">Hostel F</option>
-              </select>
-            </div>
-
-            <div>
-              <label
-                htmlFor="Room_Number"
-                className="block text-gray-700 text-sm font-semibold mb-2"
-              >
-                Room Number
-              </label>
-              <input
-                id="Room_Number"
-                name="Room_Number"
-                type="text"
-                placeholder="Enter room number"
-                value={formData.Room_Number}
-                onChange={handleChange}
-                required
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              />
-            </div>
-          </div>
-
-          {/* Contact Number */}
+          {/* Hostel Name */}
           <div className="mb-6">
             <label
-              htmlFor="contact_Number"
+              htmlFor="Hostel_Name"
               className="block text-gray-700 text-sm font-semibold mb-2"
             >
-              Contact Number
+              Hostel Name
             </label>
-            <input
-              id="contact_Number"
-              name="contact_Number"
-              type="tel"
-              placeholder="Enter your contact number"
-              value={formData.contact_Number}
+            <select
+              id="Hostel_Name"
+              name="Hostel_Name"
+              value={formData.Hostel_Name}
               onChange={handleChange}
               required
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-            />
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            >
+              <option value="">Select hostel</option>
+              <option value="Hostel A">Hostel A</option>
+              <option value="Hostel B">Hostel B</option>
+              <option value="Hostel C">Hostel C</option>
+              <option value="Hostel D">Hostel D</option>
+              <option value="Hostel E">Hostel E</option>
+              <option value="Hostel F">Hostel F</option>
+            </select>
           </div>
 
           {/* Profile Picture URL (Optional) */}
@@ -234,7 +164,7 @@ function StudentRegister() {
               placeholder="Enter profile picture URL"
               value={formData.profilePic}
               onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             />
           </div>
 
@@ -256,7 +186,7 @@ function StudentRegister() {
                 onChange={handleChange}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               />
             </div>
 
@@ -276,7 +206,7 @@ function StudentRegister() {
                 onChange={handleChange}
                 required
                 minLength={6}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
               />
             </div>
           </div>
@@ -285,7 +215,7 @@ function StudentRegister() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold py-3 rounded-lg hover:from-blue-700 hover:to-indigo-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-semibold py-3 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Registering...' : 'Register'}
           </button>
@@ -295,8 +225,8 @@ function StudentRegister() {
             <p className="text-gray-600">
               Already have an account?{' '}
               <Link
-                to="/login/student"
-                className="text-blue-600 hover:text-blue-800 font-semibold"
+                to="/login/admin"
+                className="text-indigo-600 hover:text-indigo-800 font-semibold"
               >
                 Login here
               </Link>
@@ -318,4 +248,5 @@ function StudentRegister() {
   );
 }
 
-export default StudentRegister;
+export default AdminRegister;
+

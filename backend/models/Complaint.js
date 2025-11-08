@@ -16,4 +16,3 @@ const Complaint = mongoose.models.Complaint || mongoose.model('Complaint', Compl
 
 export default Complaint;
 
-
