@@ -14,7 +14,7 @@ import {
   analytics,
   pendingClubs,
   pendingBlogs,
-} from "../controllers/adminController.js";
+} from "../controllers/HostelAdminController.js";
 const router = express.Router();
 // Middleware: Student must be admin
 // CLUB ROUTES
