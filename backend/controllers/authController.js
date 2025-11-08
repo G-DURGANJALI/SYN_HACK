@@ -7,49 +7,87 @@ import generateToken from "../utils/generateToken.js"; // same as your previous 
 // ----------------------------- Student ---------------------------------
 
 export const registerStudent = async (req, res) => {
-  const {
-    name,
-    email,
-    password,
-    student_id,
-    Hostel_Name,
-    Room_Number,
-    contact_Number,
-  } = req.body;
-
   try {
-    const existingStudent = await Student.findOne({
-      $or: [{ email }, { student_id }],
-    });
-    if (existingStudent)
-      return res.status(400).json({ message: "Student already exists" });
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    let profilePic = "";
-    if (req.file) profilePic = req.file.path; // multer-storage-cloudinary
-
-    const newStudent = await Student.create({
+    const {
       name,
       email,
-      password: hashedPassword,
-      profilePic,
+      password,
       student_id,
       Hostel_Name,
       Room_Number,
       contact_Number,
+    } = req.body;
+
+    // --- Basic field validation ---
+    if (
+      !name ||
+      !email ||
+      !password ||
+      !student_id ||
+      !Hostel_Name ||
+      !Room_Number ||
+      !contact_Number
+    ) {
+      return res.status(400).json({ message: "All fields are required" });
+    }
+
+    // --- Enum validation for hostel name ---
+    const validHostels = ["V.G. Bhide", "M.S. Swaminathan", "Anandibai Joshi"];
+    if (!validHostels.includes(Hostel_Name)) {
+      return res.status(400).json({ message: "Invalid hostel name" });
+    }
+
+    // --- Check for existing student by email or ID ---
+    const existingStudent = await Student.findOne({
+      $or: [{ email }, { student_id }],
+    });
+    if (existingStudent) {
+      return res.status(400).json({ message: "Student already exists" });
+    }
+
+    // --- Hash password securely ---
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // --- Handle optional profile photo (Cloudinary) ---
+    let profilePic = "";
+    if (req.file && req.file.path) {
+      profilePic = req.file.path;
+    }
+
+    // --- Create new student document ---
+    const newStudent = await Student.create({
+      name,
+      email,
+      password: hashedPassword,
+      student_id,
+      Hostel_Name,
+      Room_Number,
+      contact_Number,
+      profilePic,
     });
 
+    // --- Generate JWT token cookie ---
     generateToken(res, newStudent._id, "student");
-    res
-      .status(201)
-      .json({ message: "Student registered successfully", student: newStudent });
+
+    // --- Return success response ---
+    res.status(201).json({
+      message: "Student registered successfully",
+      student: {
+        _id: newStudent._id,
+        name: newStudent.name,
+        email: newStudent.email,
+        student_id: newStudent.student_id,
+        Hostel_Name: newStudent.Hostel_Name,
+        Room_Number: newStudent.Room_Number,
+        contact_Number: newStudent.contact_Number,
+        profilePic: newStudent.profilePic || "",
+      },
+    });
   } catch (error) {
     console.error("Error registering student:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 export const loginStudent = async (req, res) => {
   const { student_id, password } = req.body;
 
