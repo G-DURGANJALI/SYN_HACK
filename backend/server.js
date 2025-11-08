@@ -5,7 +5,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
-import hostelAdminRoutes from './routes/HostelAdminRoutes.js';
+import hostelAdminRoutes from './routes/hostelAdminRoutes.js';
 import workerRoutes from './routes/workerRoutes.js';
 
 
