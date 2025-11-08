@@ -14,9 +14,10 @@ function StudentRegister() {
     Hostel_Name: '',
     Room_Number: '',
     contact_Number: '',
-    profilePic: '',
+    profilePic: null,
   });
   const [loading, setLoading] = useState(false);
+  const [preview, setPreview] = useState(null);
 
   const handleChange = (e) => {
     setFormData({
@@ -44,21 +45,43 @@ function StudentRegister() {
     }
 
     try {
-      const { confirmPassword, ...dataToSend } = formData;
-      
-      // TODO: Replace with actual API endpoint
-      const response = await axios.post('/api/student/register', dataToSend);
-      
+      const { confirmPassword, ...rest } = formData;
+
+      // Create FormData for sending files + text
+      const dataToSend = new FormData();
+
+      // Append all non-file fields
+      Object.keys(rest).forEach((key) => {
+        if (key !== "profilePic") {
+          dataToSend.append(key, rest[key]);
+        }
+      });
+
+      // Append file only if selected
+      if (rest.profilePic) {
+        dataToSend.append("profilePic", rest.profilePic);
+      }
+
+      // API call
+      const response = await axios.post('/api/student/register', dataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
       if (response.data.success) {
         toast.success('Registration successful! Please login.');
         navigate('/login/student');
       }
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Registration failed. Please try again.');
+      toast.error(
+        error.response?.data?.message || 'Registration failed. Please try again.'
+      );
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen flex items-center justify-center p-4">
@@ -216,24 +239,52 @@ function StudentRegister() {
             />
           </div>
 
-          {/* Profile Picture URL (Optional) */}
+          {/* Profile Picture Upload (Optional) */}
           <div className="mb-6">
             <label
               htmlFor="profilePic"
               className="block text-gray-700 text-sm font-semibold mb-2"
             >
-              Profile Picture URL (Optional)
+              Profile Picture (Optional)
             </label>
+
+            {/* File Input */}
             <input
               id="profilePic"
               name="profilePic"
-              type="url"
-              placeholder="Enter profile picture URL"
-              value={formData.profilePic}
-              onChange={handleChange}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              type="file"
+              accept="image/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                setFormData({
+                  ...formData,
+                  profilePic: file, // store File object instead of URL
+                });
+
+                // Show preview
+                if (file) {
+                  const previewURL = URL.createObjectURL(file);
+                  setPreview(previewURL);
+                }
+              }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg 
+                focus:outline-none focus:ring-2 focus:ring-blue-500 
+                focus:border-transparent transition bg-white"
             />
+
+            {/* Preview Selected Image */}
+            {preview && (
+              <div className="mt-3">
+                <p className="text-xs text-gray-500 mb-1">Preview:</p>
+                <img
+                  src={preview}
+                  alt="Profile Preview"
+                  className="w-24 h-24 object-cover rounded-full border"
+                />
+              </div>
+            )}
           </div>
+
 
           {/* Password Fields */}
           <div className="grid md:grid-cols-2 gap-6 mb-6">
@@ -292,7 +343,7 @@ function StudentRegister() {
             <p className="text-gray-600">
               Already have an account?{' '}
               <Link
-                to="/login/student"
+                to="/students/login"
                 className="text-blue-600 hover:text-blue-800 font-semibold"
               >
                 Login here

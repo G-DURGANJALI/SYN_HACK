@@ -6,7 +6,11 @@ const studentSchema = new mongoose.Schema({
   password: { type: String, required: true },
   profilePic: { type: String },
   student_id: { type: String, required: true, unique: true },
-  Hostel_Name: { type: String , required: true },
+  Hostel_Name: {
+    type: String,
+    enum: ["V.G. Bhide", "M.S. Swaminathan", "Anandibai Joshi"],
+    required: true
+  },
   Room_Number: { type: String , required: true },
   contact_Number: { type: String , required: true },
 }, { timestamps: true });

@@ -18,14 +18,12 @@ export default function App() {
     
     <Router>
       <ToastContainer position="top-right" autoClose={3000} />
-
       <Routes>
         <Route path="hostel-admin/*" element={<HostelAdminRoutes />} />
         <Route path="students/*" element={<StudentRoutes />} />
         <Route path="workers/*" element={<WorkerRoutes />} />
         <Route path="/" element={<RoleSelection />} />
         <Route path="*" element={<NotFound />} />
-
       </Routes>
 
     </Router>

@@ -4,7 +4,11 @@ const AdminSchema = new mongoose.Schema({
   name: String,
   email: { type: String, unique: true },
   password: String,
-  Hostel_Name: String,
+  contact_Number: String,
+  Hostel_Name: {
+    type: String,
+    enum: ["Hostel A", "Hostel B", "Hostel C"], 
+  },
   profilePic: String,
   
 }, { timestamps: true });
