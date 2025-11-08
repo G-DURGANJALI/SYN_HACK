@@ -69,7 +69,7 @@ function StudentRegister() {
         },
       });
 
-      if (response.data.success) {
+      if (response.status === 201) {
         toast.success('Registration successful! Please login.');
         navigate('http://localhost:5000/api/auth/student/login');
       }

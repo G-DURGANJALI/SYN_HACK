@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import Student from "../models/Student.js";
+import Student from "../models/student.js";
 import Worker from "../models/Worker.js";
 import Admin from "../models/HostelAdmin.js";
 import generateToken from "../utils/generateToken.js"; // same as your previous project
