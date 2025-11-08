@@ -5,8 +5,10 @@ const studentSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   profilePic: { type: String },
-  
-  likedBlogs: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Blog' }]
+  student_id: { type: String, required: true, unique: true },
+  Hostel_Name: { type: String , required: true },
+  Room_Number: { type: String , required: true },
+  contact_Number: { type: String , required: true },
 }, { timestamps: true });
 
 const Student = mongoose.models.Student || mongoose.model('Student', studentSchema);
