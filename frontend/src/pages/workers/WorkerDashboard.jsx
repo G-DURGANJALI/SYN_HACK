@@ -1,203 +1,292 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-function WorkerDashboard() {
+// Tailwind color mapping
+const colorMap = {
+  blue: { border: "border-blue-600", bgLight: "bg-blue-100", text: "text-blue-600" },
+  yellow: { border: "border-yellow-500", bgLight: "bg-yellow-100", text: "text-yellow-600" },
+  green: { border: "border-green-600", bgLight: "bg-green-100", text: "text-green-600" },
+  red: { border: "border-red-600", bgLight: "bg-red-100", text: "text-red-600" },
+  gray: { border: "border-gray-500", bgLight: "bg-gray-100", text: "text-gray-700" },
+};
+
+const statusToColor = {
+  assigned: "blue",
+  "in progress": "yellow",
+  completed: "green",
+  rejected: "red",
+};
+
+// Stat card
+function StatCard({ title, value, colorKey, iconPath }) {
+  const c = colorMap[colorKey] || colorMap.blue;
   return (
-    <div className="bg-gray-50 min-h-screen p-6">
-      {/* Header */}
-      <div className="bg-white rounded-lg shadow mb-6 p-6">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-gray-800">Rajesh Kumar</h1>
-            <p className="text-gray-600">Electrical Department</p>
-          </div>
-          <button className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700">
-            Logout
-          </button>
+    <div className={`bg-white rounded-xl shadow-sm p-4 border ${c.border}`}>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-gray-500 text-xs font-semibold">{title}</p>
+          <p className="text-2xl font-bold text-gray-800 mt-1">{value}</p>
         </div>
-      </div>
-
-      {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {[
-          {
-            title: "Total Assigned",
-            value: "8",
-            color: "blue",
-            iconPath:
-              "M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2",
-          },
-          {
-            title: "Completed",
-            value: "5",
-            color: "green",
-            iconPath:
-              "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
-          },
-          {
-            title: "In Progress",
-            value: "3",
-            color: "yellow",
-            iconPath:
-              "M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z",
-          },
-          {
-            title: "My Rating",
-            value: "★★★★☆",
-            color: "purple",
-            iconPath:
-              "M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z",
-          },
-        ].map((card, i) => (
-          <div key={i} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-500 text-sm">{card.title}</p>
-                <h3
-                  className={`text-3xl font-bold text-${card.color}-600 mt-1`}
-                >
-                  {card.title === "My Rating" ? (
-                    <span className="text-yellow-500">{card.value}</span>
-                  ) : (
-                    card.value
-                  )}
-                </h3>
-                {card.title === "My Rating" && (
-                  <p className="text-sm text-gray-600 mt-1">4.2/5.0</p>
-                )}
-              </div>
-              <div className={`bg-${card.color}-100 p-3 rounded-full`}>
-                <svg
-                  className={`w-8 h-8 text-${card.color}-600`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d={card.iconPath}
-                  />
-                </svg>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Complaints Table */}
-      <div className="bg-white rounded-lg shadow overflow-hidden">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-bold text-gray-800">
-            My Assigned Complaints
-          </h2>
-        </div>
-
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                {[
-                  "ID",
-                  "Student Details",
-                  "Room",
-                  "Issue",
-                  "Priority",
-                  "Status",
-                  "Action",
-                ].map((header) => (
-                  <th
-                    key={header}
-                    className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                  >
-                    {header}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-
-            <tbody className="bg-white divide-y divide-gray-200">
-              {[
-                {
-                  id: "#001",
-                  name: "AJMEERA RAHUL",
-                  studentId: "30432",
-                  roll: "BT23CSE033",
-                  room: "S-34",
-                  issue: "Fan not working",
-                  priority: { text: "High", color: "red" },
-                  status: { text: "Resolved", color: "green" },
-                  action: "Completed",
-                },
-                {
-                  id: "#005",
-                  name: "GHOKSHE TARKESH PRABHAKAR",
-                  studentId: "31456",
-                  roll: "BT23CSE086",
-                  room: "S-73",
-                  issue: "Light flickering",
-                  priority: { text: "Medium", color: "yellow" },
-                  status: { text: "In Progress", color: "yellow" },
-                  action: "Update",
-                },
-                {
-                  id: "#007",
-                  name: "VIVEK KUMAR",
-                  studentId: "30912",
-                  roll: "BT23CSE081",
-                  room: "S-21",
-                  issue: "Tube light not working",
-                  priority: { text: "Low", color: "green" },
-                  status: { text: "Pending", color: "red" },
-                  action: "Update",
-                },
-              ].map((c, i) => (
-                <tr key={i} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {c.id}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
-                      {c.name}
-                    </div>
-                    <div className="text-sm text-gray-500">ID: {c.studentId}</div>
-                    <div className="text-sm text-gray-500">{c.roll}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {c.room}
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-900">{c.issue}</td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-${c.priority.color}-100 text-${c.priority.color}-800`}
-                    >
-                      {c.priority.text}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`text-sm font-semibold text-${c.status.color}-600`}
-                    >
-                      {c.status.text}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    {c.action === "Update" ? (
-                      <button className="text-blue-600 hover:text-blue-900 font-medium">
-                        Update
-                      </button>
-                    ) : (
-                      <span className="text-gray-400">{c.action}</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className={`${c.bgLight} p-2 rounded-full`}>
+          <svg className={`w-6 h-6 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={iconPath} />
+          </svg>
         </div>
       </div>
     </div>
   );
 }
 
-export default WorkerDashboard;
+// Desktop table row
+function TaskRow({ task, onView, onStart, onComplete, onProof }) {
+  const statusColor = statusToColor[task.status?.toLowerCase()] || "gray";
+  const colorClasses = colorMap[statusColor];
+  const date = new Date(task.date || Date.now());
+  const dateStr = date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+
+  return (
+    <tr className="hover:bg-gray-50 transition duration-150">
+      <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{task.tokenNumber}</td>
+      <td className="px-3 py-3 text-sm text-gray-700">{task.subject}</td>
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-700">{task.hostelBlock}</td>
+      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-700">{dateStr}</td>
+      <td className="px-3 py-3 whitespace-nowrap text-sm">
+        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${colorClasses.bgLight} ${colorClasses.text}`}>
+          {task.status}
+        </span>
+      </td>
+      <td className="px-3 py-3 whitespace-nowrap text-sm">
+        <div className="flex flex-wrap gap-2">
+          <button onClick={() => onView(task)} className="text-blue-600 hover:text-blue-800 font-semibold text-sm px-2 py-1 rounded">
+            View
+          </button>
+          {task.status.toLowerCase() === "assigned" && (
+            <button onClick={() => onStart(task)} className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs">
+              Start
+            </button>
+          )}
+          {task.status.toLowerCase() === "in progress" && (
+            <button onClick={() => onComplete(task)} className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs">
+              Complete
+            </button>
+          )}
+          <button onClick={() => onProof(task)} className="bg-indigo-600 hover:bg-indigo-700 text-white px-2 py-1 rounded text-xs">
+            Upload Proof
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+}
+
+// Mobile card
+function TaskCard({ task, onView, onStart, onComplete, onProof }) {
+  const statusColor = statusToColor[task.status?.toLowerCase()] || "gray";
+  const colorClasses = colorMap[statusColor];
+  const date = new Date(task.date || Date.now());
+  const dateStr = date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-gray-700">Token #{task.tokenNumber}</span>
+            <span className="text-xs text-gray-500">{dateStr}</span>
+          </div>
+          <p className="text-gray-900 font-semibold mt-2">{task.subject}</p>
+          <p className="text-xs text-gray-500 mt-1">{task.hostelBlock}</p>
+        </div>
+        <span className={`px-2 py-1 text-xs font-semibold rounded-full ${colorClasses.bgLight} ${colorClasses.text}`}>
+          {task.status}
+        </span>
+      </div>
+
+      <div className="flex flex-wrap gap-2 mt-3">
+        <button onClick={() => onView(task)} className="text-sm bg-white border border-gray-200 text-gray-700 px-3 py-1 rounded-md">
+          View
+        </button>
+        {task.status.toLowerCase() === "assigned" && (
+          <button onClick={() => onStart(task)} className="text-sm bg-yellow-500 text-white px-3 py-1 rounded-md">
+            Start
+          </button>
+        )}
+        {task.status.toLowerCase() === "in progress" && (
+          <button onClick={() => onComplete(task)} className="text-sm bg-green-600 text-white px-3 py-1 rounded-md">
+            Complete
+          </button>
+        )}
+        <button onClick={() => onProof(task)} className="text-sm bg-indigo-600 text-white px-3 py-1 rounded-md">
+          Upload Proof
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function WorkerDashboard() {
+  const navigate = useNavigate();
+
+  // Dummy tasks
+  const [tasks, setTasks] = useState([
+    { tokenNumber: 30, subject: "Fix ceiling fan in Room 214", hostelBlock: "V.G. Bhide, Room F-110", date: "2025-11-06", status: "Assigned" },
+    { tokenNumber: 23, subject: "Repair water tap in washroom", hostelBlock: "M.S. Swaminathan, Room S-22", date: "2025-11-05", status: "In Progress" },
+    { tokenNumber: 17, subject: "Replace broken window pane", hostelBlock: "J.C. Bose, Room F-80", date: "2025-11-03", status: "Completed" },
+    { tokenNumber: 12, subject: "Check corridor lights", hostelBlock: "V.G. Bhide, Room G-10", date: "2025-11-04", status: "Rejected" },
+  ]);
+
+  const [filter, setFilter] = useState("All");
+
+  // Derived stats
+  const stats = useMemo(() => {
+    const total = tasks.length;
+    const assigned = tasks.filter(t => t.status.toLowerCase() === "assigned").length;
+    const inProgress = tasks.filter(t => t.status.toLowerCase() === "in progress").length;
+    const completed = tasks.filter(t => t.status.toLowerCase() === "completed").length;
+    return { total, assigned, inProgress, completed };
+  }, [tasks]);
+
+  const filteredTasks = useMemo(() => {
+    if (filter === "All") return tasks;
+    return tasks.filter(t => t.status.toLowerCase() === filter.toLowerCase());
+  }, [tasks, filter]);
+
+  // Actions (replace later with API)
+  const handleLogout = () => navigate("/login");
+  const handleView = (task) => alert(`Viewing Token #${task.tokenNumber}: ${task.subject}`);
+  const handleStart = (task) => {
+    setTasks(prev => prev.map(t => (t.tokenNumber === task.tokenNumber ? { ...t, status: "In Progress" } : t)));
+  };
+  const handleComplete = (task) => {
+    setTasks(prev => prev.map(t => (t.tokenNumber === task.tokenNumber ? { ...t, status: "Completed" } : t)));
+  };
+  const handleUploadProof = (task) => {
+    navigate(`/worker/tasks/${task.tokenNumber}/upload-proof`, { state: { task } });
+  };
+
+  return (
+    <div className="bg-gradient-to-br from-indigo-50 to-blue-100 min-h-screen">
+      {/* Navbar */}
+      <nav className="bg-white shadow sticky top-0 z-20">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-14 md:h-16">
+            <div className="flex items-center gap-2">
+              <svg className="w-7 h-7 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2v-7H3v7a2 2 0 002 2z" />
+              </svg>
+              <span className="ml-1 text-lg md:text-xl font-bold text-gray-800">Worker Dashboard</span>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span className="hidden sm:inline text-gray-700 font-medium">Welcome, Worker</span>
+              <button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-sm">
+                Logout
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+
+      {/* Main */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Header */}
+        <div className="mb-6">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Task Overview</h1>
+          <p className="text-sm text-gray-600">Check your assigned jobs and update their progress</p>
+        </div>
+
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <StatCard title="Total" value={stats.total} colorKey="blue" iconPath="M9 12h6m-6 4h6" />
+          <StatCard title="Assigned" value={stats.assigned} colorKey="blue" iconPath="M12 8v4l3 3" />
+          <StatCard title="In Progress" value={stats.inProgress} colorKey="yellow" iconPath="M3 12h18" />
+          <StatCard title="Completed" value={stats.completed} colorKey="green" iconPath="M9 12l2 2 4-4" />
+        </div>
+
+        {/* Filter buttons */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+          <div className="flex gap-2">
+            {["All", "Assigned", "In Progress", "Completed", "Rejected"].map((option) => (
+              <button
+                key={option}
+                onClick={() => setFilter(option)}
+                className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                  filter === option ? "bg-indigo-600 text-white shadow" : "bg-white text-gray-700 border border-gray-200"
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex justify-end">
+            <button
+              onClick={() => navigate("/worker/history")}
+              className="inline-flex items-center bg-white border border-gray-200 text-gray-700 font-semibold px-3 py-2 rounded-lg hover:bg-gray-50 text-sm"
+            >
+              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v8m4-4H8" />
+              </svg>
+              View History
+            </button>
+          </div>
+        </div>
+
+        {/* Desktop Table */}
+        <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
+          <div className="bg-gradient-to-r from-indigo-600 to-blue-600 px-5 py-3">
+            <h2 className="text-white font-semibold">{filter === "All" ? "All Tasks" : `${filter} Tasks`}</h2>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full table-auto">
+              <thead className="bg-gray-50">
+                <tr>
+                  {["Token", "Subject", "Hostel", "Date", "Status", "Actions"].map((h) => (
+                    <th key={h} className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredTasks.length === 0 ? (
+                  <tr>
+                    <td className="p-6 text-center text-gray-500" colSpan={6}>No {filter.toLowerCase()} tasks found.</td>
+                  </tr>
+                ) : (
+                  filteredTasks.map((t) => (
+                    <TaskRow
+                      key={t.tokenNumber}
+                      task={t}
+                      onView={handleView}
+                      onStart={handleStart}
+                      onComplete={handleComplete}
+                      onProof={handleUploadProof}
+                    />
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden mt-3">
+          {filteredTasks.length === 0 ? (
+            <div className="text-center text-gray-500 py-6">No {filter.toLowerCase()} tasks found.</div>
+          ) : (
+            filteredTasks.map((t) => (
+              <TaskCard
+                key={t.tokenNumber}
+                task={t}
+                onView={handleView}
+                onStart={handleStart}
+                onComplete={handleComplete}
+                onProof={handleUploadProof}
+              />
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
