@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import axios from 'axios';
 import NotFound from './pages/NotFound';
 import StudentRoutes from './routes/StudentRoutes';
-
+import WorkerRoutes from './routes/WorkerRoutes';
 
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
@@ -23,6 +23,7 @@ export default function App() {
 
 
         <Route path="students/*" element={<StudentRoutes />} />
+        <Route path="workers/*" element={<WorkerRoutes />} />
         <Route path="*" element={<NotFound />} />
 
       </Routes>
