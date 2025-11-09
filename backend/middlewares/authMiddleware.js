@@ -63,3 +63,30 @@ export const isAdmin = (req, res, next) => {
    }
 };
 // done completely
+
+import Worker from "../models/Worker.js";
+
+export const protectWorker = async (req, res, next) => {
+  try {
+    const token =
+      req.cookies?.workerToken ||
+      req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return res.status(401).json({ message: "Not authorized, no token" });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const worker = await Worker.findById(decoded.id).select("-password");
+    if (!worker) {
+      return res.status(404).json({ message: "Worker not found" });
+    }
+
+    req.worker = worker; // ✅ attach worker to request
+    next();
+  } catch (error) {
+    console.error("protectWorker error:", error.message);
+    res.status(401).json({ message: "Invalid or expired token" });
+  }
+};

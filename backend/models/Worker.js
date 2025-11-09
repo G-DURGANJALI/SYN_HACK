@@ -9,7 +9,7 @@ const workerSchema = new mongoose.Schema({
   rating: { type: Number, default: 0 },
   contact_Number: { type: String, required: true },
 
-  // 🆕 Worker availability for next day
+  
   availability: [{
     date: { type: Date, required: true },
     timeSlot: { type: String, required: true } // e.g., "2pm-4pm" or "after 6pm"
