@@ -1,125 +1,61 @@
+import Complaint from "../models/Complaint.js";
+import Student from "../models/student.js";
+import Worker from "../models/Worker.js";
+import mongoose from "mongoose";
 
 
-export const allClubs = async (req, res) => {
+// Get all complaints
+export const allComplaints = async (req, res) => {
   try {
-    const clubs = await Club.find();
-    res.status(200).json({success:true,clubs});
+    const complaints = await Complaint.find()
+      .populate("studentId", "name email student_id Hostel_Name Room_Number contact_Number profilePic")
+      .sort({ createdAt: -1 });
+    res.status(200).json({ success: true, complaints });
   } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch pending clubs' });
+    console.error("allComplaints error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch complaints." });
   }
 };
 
-export const approveClub = async (req, res) => {
+
+export const assignComplaintsFIFO = async (req = null, res = null) => {
   try {
-    const club = await Club.findById(req.params.clubId);
-    if (!club) return res.status(404).json({ message: 'Club not found' });
+    const pendingComplaints = await Complaint.find({ status: "pending" }).sort({ createdAt: 1 });
 
-    club.isApproved = true;
-    await club.save();
-    res.status(200).json({ message: 'Club approved successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to approve club' });
-  }
-};
+    for (const complaint of pendingComplaints) {
+      const workers = await Worker.find({ role: complaint.category });
 
-export const rejectClub = async (req, res) => {
-  try {
-    const club = await Club.findById(req.params.clubId);
-    if (!club) return res.status(404).json({ message: 'Club not found' });
+      for (const worker of workers) {
+        if (!worker.availability) continue;
 
-    await Club.findByIdAndDelete(req.params.clubId); // or set isRejected = true if you want to keep data
-    res.status(200).json({ message: 'Club rejected and deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to reject club' });
-  }
-};
+        const match = worker.availability.find(
+          (slot) =>
+            complaint.studentAvailability &&
+            complaint.studentAvailability.toLowerCase().includes(slot.timeSlot.toLowerCase())
+        );
 
-export const pendingClubs = async (req, res) => {
-  try {
-    const clubs = await Club.find({ isApproved: false });
-    res.status(200).json({ 
-      success: true,
-      clubs: clubs 
-    });
-  } catch (error) {
-    console.error("Error fetching pending clubs:", error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Failed to fetch pending clubs' 
-    });
-  }
-};
+        if (match) {
+          complaint.workerAssigned = worker._id;
+          complaint.status = "assigned";
+          complaint.scheduledTime = match.timeSlot;
+          await complaint.save();
 
-// --- BLOGS ---
-
-export const allBlogs = async (req, res) => {
-  try {
-    const blogs = await Blog.find();
-    res.status(200).json( {
-      success: true,
-      blogs
-    });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to fetch pending blogs' });
-  }
-};
-
-export const approveBlog = async (req, res) => {
-  try {
-    const blog = await Blog.findById(req.params.blogId);
-    if (!blog) return res.status(404).json({ message: 'Blog not found' });
-
-    blog.status = 'approved';
-    await blog.save();
-    res.status(200).json({ success: true,message: 'Blog approved successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to approve blog' });
-  }
-};
-
-export const rejectBlog = async (req, res) => {
-  try {
-    const blog = await Blog.findById(req.params.blogId);
-    if (!blog) return res.status(404).json({ message: 'Blog not found' });
-
-    blog.status = 'rejected';
-    await Blog.findByIdAndDelete(req.params.blogId);
-   
-    res.status(200).json({ message: 'Blog rejected  and deleted successfully' });
-  } catch (error) {
-    res.status(500).json({ message: 'Failed to reject blog' });
-  }
-};
-
-export const pendingBlogs = async (req, res) => {
-  try {
-    const blogs = await Blog.find({ status: 'pending' });
-    res.status(200).json({ 
-      success: true,
-      blogs: blogs 
-    });
-  } catch (error) {
-    console.error("Error fetching pending blogs:", error);
-    res.status(500).json({ 
-      success: false,
-      message: 'Failed to fetch pending blogs' 
-    });
-  }
-};
-
-export const analytics= async (req, res)=> {
-  try {
-
-    const stats = {
-      totalStudents: await Student.countDocuments(),
-      approvedClubs: await Club.countDocuments({isApproved: true}),
-      disapprovedClubs: await Club.countDocuments({isApproved: false}),
-      approvedBlogs: await Blog.countDocuments({status: 'approved'}),
-      pendingBlogs: await Blog.countDocuments({status: 'pending'}),
+          console.log(`✅ Assigned Token #${complaint.tokenNumber} → Worker ${worker.name}`);
+          break;
+        }
+      }
     }
-    res.status(200).json(stats);
-  } catch(error)
-  {
-    res.status(500).json({message: 'Failed to get analytics'});
+
+    // Handle both direct and API calls
+    if (res)
+      return res.status(200).json({ message: "Complaints assigned successfully (FIFO)." });
+    else
+      return "Job complete";
+  } catch (error) {
+    console.error("assignComplaintsFIFO error:", error);
+    if (res)
+      res.status(500).json({ message: "Error assigning complaints." });
+    else throw error;
   }
 };
+

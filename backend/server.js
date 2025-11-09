@@ -5,7 +5,7 @@ import cors from 'cors';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
 import studentRoutes from './routes/studentRoutes.js';
-import hostelAdminRoutes from './routes/HostelAdminRoutes.js';
+import hostelAdminRoutes from './routes/hostelAdminRoutes.js';
 import workerRoutes from './routes/workerRoutes.js';
 
 
@@ -32,6 +32,10 @@ app.use('/api/students', studentRoutes);
 app.use('/api/hostelAdmins', hostelAdminRoutes);
 app.use('/api/workers', workerRoutes);
 const PORT = process.env.PORT || 5000;
+
+// Initialize scheduled jobs
+import "./jobs/autoAssignJob.js";
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

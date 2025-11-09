@@ -36,6 +36,12 @@ const ComplaintSchema = new mongoose.Schema({
   // Updated field for attachments
   attachments: { type: [attachmentSchema], default: [] },
 
+  tokenNumber: { type: Number, unique: true, index: true },
+  studentAvailability: { type: String, required: true },  // e.g., "After 6pm this week"
+  workerAssigned: { type: mongoose.Schema.Types.ObjectId, ref: "Worker" },
+  scheduledTime: { type: String }, // optional specific time once assigned
+
+
   createdAt: { type: Date, default: Date.now }
 }, { timestamps: true });
 

@@ -9,53 +9,93 @@ export const logoutStudent = (req, res) => {
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
-// Create a new complaint
 export const createComplaint = async (req, res) => {
   try {
-    const { title, description, category, priority } = req.body;
+    const { subject, description, category } = req.body;
 
-    if (!title || !description) {
-      return res.status(400).json({ message: 'Title and description are required' });
+    // Validation
+    if (!subject || !description || !category) {
+      return res.status(400).json({
+        success: false,
+        message: "Subject, description, and category are required.",
+      });
     }
 
-    const complaintData = {
-      title,
+    // Ensure the logged-in student exists
+    const student = await Student.findById(req.student._id);
+    if (!student) {
+      return res.status(404).json({ success: false, message: "Student not found." });
+    }
+
+    // Handle file uploads (optional, image/audio)
+    const attachments = [];
+    if (req.files && req.files.length > 0) {
+      req.files.forEach((file) => {
+        const mimeType = file.mimetype || "";
+        const fileType = mimeType.startsWith("audio") ? "audio" : "image"; // only audio/image allowed
+
+        attachments.push({
+          url: file.path,
+          filename: file.originalname,
+          mimeType,
+          fileType,
+          size: file.size,
+        });
+      });
+    }
+
+    // Create complaint
+    const complaint = await Complaint.create({
+      studentId: student._id,
+      Room_Number: student.Room_Number,
+      Hostel_Name: student.Hostel_Name,
+      subject,
       description,
-      createdBy: req.student._id,
-      status: 'open',
-    };
+      category,
+      status: "pending",
+      attachments,
+    });
 
-    if (category) complaintData.category = category;
-    if (priority) complaintData.priority = priority;
-
-    // optional: support an image upload for complaint
-    if (req.file) complaintData.attachment = req.file.path;
-
-    const complaint = await Complaint.create(complaintData);
-    res.status(201).json({ success: true, complaint });
+    res.status(201).json({
+      success: true,
+      message: "Complaint created successfully.",
+      complaint,
+    });
   } catch (error) {
-    console.error('createComplaint error:', error);
-    res.status(500).json({ success: false, message: 'Failed to create complaint' });
+    console.error("createComplaint error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to create complaint.",
+    });
   }
 };
 
 // Get all complaints (own complaints by default; ?all=true to get all complaints)
 export const getAllComplaints = async (req, res) => {
   try {
-    const showAll = req.query.all === 'true';
-    const filter = showAll ? {} : { createdBy: req.student._id };
+    const showAll = req.query.all === "true";
+
+    // Filter: show only current student's complaints unless admin or query.all=true
+    const filter = showAll ? {} : { studentId: req.student._id };
 
     const complaints = await Complaint.find(filter)
-      .populate('createdBy', 'name email roomNo')     // adjust fields to your Student schema
-      .populate('assignedTo', 'name email')            // worker details if assigned
+      .populate("studentId", "name email student_id Hostel_Name Room_Number contact_Number profilePic")
       .sort({ createdAt: -1 });
 
-    res.status(200).json({ success: true, complaints });
+    res.status(200).json({
+      success: true,
+      count: complaints.length,
+      complaints,
+    });
   } catch (error) {
-    console.error('getAllComplaints error:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch complaints' });
+    console.error("getAllComplaints error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch complaints.",
+    });
   }
 };
+
 
 // Like or unlike a complaint (toggle)
 export const likeComplaint = async (req, res) => {
