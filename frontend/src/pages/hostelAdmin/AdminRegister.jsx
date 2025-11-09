@@ -12,6 +12,8 @@ function AdminRegister() {
     confirmPassword: '',
     Hostel_Name: '',
     profilePic: null,
+    contact_Number: '',
+
   });
   const [loading, setLoading] = useState(false);
   const [preview, setPreview] = useState(null);
@@ -59,28 +61,18 @@ function AdminRegister() {
         dataToSend.append("profilePic", rest.profilePic);
       }
 
-           // API call
-           const apiBase = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-            const response = await axios.post(
-              `${apiBase}/api/auth/admin/register`,
-              dataToSend,
-              {
-                withCredentials: true,
-              }
-            );
-      
-            console.log('Register response:', response);
-            if (response.status === 201) {
-              toast.success('Registration successful');
-              navigate('/hostel-admin/dashboard');
-            }
-          } catch (error) {
-            toast.error(
-              error.response?.data?.message || 'Registration failed. Please try again.'
-            );
-          } finally {
-            setLoading(false);
-          }
+      // API call
+      const response = await axios.post('http://localhost:5000/api/auth/admin/register', dataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        withCredentials: true,
+      });
+
+      if (response.status === 201) {
+        toast.success('Registration successful! Please login.');
+        navigate('/hostel-admin/dashboard'); // Redirect to admin dashboard
+      }
     } catch (error) {
       toast.error(
         error.response?.data?.message || 'Registration failed. Please try again.'
@@ -155,7 +147,27 @@ function AdminRegister() {
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
             />
           </div>
-
+                {/* Mobile Number */}
+          <div className="mb-6">
+            <label
+              htmlFor="contact_Number"
+              className="block text-gray-700 text-sm font-semibold mb-2"
+            >
+              Mobile Number
+            </label>
+            <input
+              id="contact_Number"
+              name="contact_Number"
+              type="tel"
+              placeholder="Enter your mobile number"
+              value={formData.contact_Number || ''}
+              onChange={handleChange}
+              required
+              pattern="^\d{10}$"
+              maxLength={10}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition"
+            />
+          </div>
           {/* Hostel Name */}
           <div className="mb-6">
             <label

@@ -1,244 +1,232 @@
 // src/components/StudentDashboard.jsx
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-// Tailwind color mapping
-const colorMap = {
-  blue: { border: "border-blue-600", bgLight: "bg-blue-100", text: "text-blue-600" },
-  yellow: { border: "border-yellow-500", bgLight: "bg-yellow-100", text: "text-yellow-600" },
-  green: { border: "border-green-600", bgLight: "bg-green-100", text: "text-green-600" },
-  red: { border: "border-red-600", bgLight: "bg-red-100", text: "text-red-600" },
-};
+const apiBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000";
 
-const statusToColor = {
-  pending: "yellow",
-  open: "yellow",
-  assigned: "blue",
-  accepted: "blue",
-  resolved: "green",
-  rejected: "red",
-};
-
-// Stat card component
-function StatCard({ title, value, colorKey, iconPath }) {
-  const c = colorMap[colorKey] || colorMap.blue;
+function StatCard({ title, value, className }) {
   return (
-    <div className={`bg-white rounded-xl shadow-sm p-4 ${c.border}`}>
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-500 text-xs font-semibold">{title}</p>
-          <p className="text-2xl font-bold text-gray-800 mt-1">{value}</p>
-        </div>
-        <div className={`${c.bgLight} p-2 rounded-full`}>
-          <svg className={`w-6 h-6 ${c.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={iconPath} />
-          </svg>
-        </div>
-      </div>
+    <div className={`rounded-2xl p-4 shadow ${className}`}>
+      <div className="text-xs text-gray-700 font-semibold">{title}</div>
+      <div className="text-2xl font-bold mt-1">{value}</div>
     </div>
   );
 }
 
-// Complaint row for desktop/tablet
-function ComplaintRow({ comp, onView }) {
-  const statusColor = statusToColor[comp.status?.toLowerCase()] || "blue";
-  const colorClasses = colorMap[statusColor];
-  const idLabel = comp.id || "—";
-  const date = new Date(comp.date || Date.now());
-  const dateStr = date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+function ComplaintCard({ c, onView, onSurvey }) {
+  const pendingish = ["pending", "in progress"].includes((c.status || "").toLowerCase());
+  const resolved = (c.status || "").toLowerCase() === "resolved";
 
   return (
-    <tr className="hover:bg-gray-50 transition duration-150">
-      <td className="px-3 py-3 whitespace-nowrap text-sm font-medium text-gray-900">{idLabel}</td>
-      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-700">{comp.category}</td>
-      <td className="px-3 py-3 text-sm text-gray-700">{comp.subject}</td>
-      <td className="px-3 py-3 whitespace-nowrap text-sm text-gray-700">{dateStr}</td>
-      <td className="px-3 py-3 whitespace-nowrap text-sm">
-        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${colorClasses.bgLight} ${colorClasses.text}`}>
-          {comp.status}
-        </span>
-      </td>
-      <td className="px-3 py-3 whitespace-nowrap text-sm">
-        <button
-          onClick={() => onView(comp)}
-          className="text-blue-600 hover:text-blue-800 font-semibold text-sm px-2 py-1 rounded"
-        >
-          View
-        </button>
-      </td>
-    </tr>
-  );
-}
-
-// Mobile card view for a complaint
-function ComplaintCard({ comp, onView }) {
-  const statusColor = statusToColor[comp.status?.toLowerCase()] || "blue";
-  const colorClasses = colorMap[statusColor];
-  const date = new Date(comp.date || Date.now());
-  const dateStr = date.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
-
-  return (
-    <div className="bg-white rounded-lg shadow-sm p-4 mb-4">
-      <div className="flex justify-between items-start">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold text-gray-700">{comp.category}</span>
-            <span className="text-xs text-gray-500">{dateStr}</span>
+    <div className="bg-white rounded-xl p-4 shadow-sm flex flex-col sm:flex-row justify-between items-start gap-4">
+      <div className="flex-1 pr-2">
+        <div className="flex items-start gap-3">
+          {/* small category pill */}
+          <div className="flex-shrink-0">
+            <div className="w-12 h-12 rounded-lg bg-gradient-to-br from-indigo-50 to-sky-50 flex items-center justify-center text-indigo-600 font-semibold">
+              {c.category?.[0] || "?"}
+            </div>
           </div>
-          <p className="text-gray-900 font-semibold mt-2">{comp.subject}</p>
-          <p className="text-xs text-gray-500 mt-1">{comp.id}</p>
+
+          <div className="min-w-0">
+            <div className="text-sm text-gray-500">
+              {c.category} • {c.Hostel_Name} • {c.Room_Number}
+            </div>
+            <h3 className="font-semibold text-lg mt-1 truncate">{c.subject}</h3>
+            <p className="text-sm text-gray-600 mt-1 line-clamp-2">{c.description}</p>
+          </div>
         </div>
-        <div className="flex flex-col items-end gap-2">
-          <span className={`px-2 py-1 text-xs font-semibold rounded-full ${colorClasses.bgLight} ${colorClasses.text}`}>
-            {comp.status}
-          </span>
+      </div>
+
+      <div className="w-full sm:w-44 flex flex-col items-end gap-3">
+        <div
+          className={`px-3 py-1 rounded-full text-sm font-semibold ${
+            resolved ? "bg-green-50 text-green-700" : pendingish ? "bg-yellow-50 text-yellow-700" : "bg-blue-50 text-blue-700"
+          }`}
+        >
+          {c.status}
+        </div>
+
+        <div className="w-full flex flex-col gap-2">
+          {/* View Complaint -> NAVIGATE to a route (you can change path later) */}
           <button
-            onClick={() => onView(comp)}
-            className="text-sm bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700"
+            onClick={() => onView(c)}
+            className="w-full px-3 py-2 bg-white border rounded-lg text-sm font-medium hover:shadow-sm"
           >
-            View
+            View Complaint
           </button>
+
+          {/* Complete Survey: shown only when NOT resolved -> NAVIGATE to survey route */}
+          {!resolved && (
+            <button
+              onClick={() => onSurvey(c)}
+              className="w-full px-3 py-2 bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-lg text-sm font-semibold hover:scale-105 transition"
+            >
+              Complete Survey
+            </button>
+          )}
         </div>
       </div>
     </div>
   );
 }
 
-// Main component
 export default function StudentDashboard() {
   const navigate = useNavigate();
-
-  // Dummy complaint data
-  const dummyComplaints = [
-    { id: "#GR001", category: "Electrical", subject: "Room light not working", date: "2025-11-05", status: "Pending" },
-    { id: "#GR002", category: "Plumbing", subject: "Water leakage in washroom", date: "2025-10-30", status: "Resolved" },
-    { id: "#GR003", category: "Internet", subject: "No Wi-Fi connection in Block A", date: "2025-10-20", status: "Rejected" },
-    { id: "#GR004", category: "Cleaning", subject: "Room not cleaned for 3 days", date: "2025-11-06", status: "Assigned" },
-    { id: "#GR005", category: "Electrical", subject: "Fan not working", date: "2025-11-03", status: "Resolved" },
-  ];
-
-  const [complaints] = useState(dummyComplaints);
+  const [complaints, setComplaints] = useState([]);
   const [filter, setFilter] = useState("All");
+  const [query, setQuery] = useState("");
 
-  // Derived stats
-  const stats = {
-    total: complaints.length,
-    pending: complaints.filter((c) => ["pending", "assigned"].includes(c.status.toLowerCase())).length,
-    resolved: complaints.filter((c) => c.status.toLowerCase() === "resolved").length,
-    rejected: complaints.filter((c) => c.status.toLowerCase() === "rejected").length,
+  // Dummy user info (replace with logged-in user data)
+  const user = {
+    name: "Student Name",
+    avatar: "https://i.pravatar.cc/100?img=12", // placeholder avatar
+    room: "B-203",
+    hostel: "V.G. Bhide",
   };
 
-  const filteredComplaints =
-    filter === "All" ? complaints : complaints.filter((c) => c.status.toLowerCase() === filter.toLowerCase());
+  useEffect(() => {
+    // load complaints (demo uses dummy data)
+    const load = async () => {
+      try {
+        // real API call example:
+        // const res = await axios.get(`${apiBase}/api/complaints`, { withCredentials: true });
+        // setComplaints(res.data);
+        setComplaints([
+          {
+            _id: "1",
+            id: "#GR001",
+            category: "Electrical",
+            subject: "Light not working",
+            description: "Flickering lights in my room.",
+            Room_Number: "A-101",
+            Hostel_Name: "V.G. Bhide",
+            status: "pending",
+            attachments: [],
+            createdAt: new Date().toISOString(),
+          },
+          {
+            _id: "2",
+            id: "#GR002",
+            category: "Plumbing",
+            subject: "Leak in bath",
+            description: "Pipe leak near washbasin.",
+            Room_Number: "B-203",
+            Hostel_Name: "M.S. Swaminathan",
+            status: "resolved",
+            attachments: [],
+            createdAt: new Date().toISOString(),
+          },
+          {
+            _id: "3",
+            id: "#GR003",
+            category: "Internet",
+            subject: "WiFi down",
+            description: "No wifi since morning.",
+            Room_Number: "C-310",
+            Hostel_Name: "Anandibai Joshi",
+            status: "In Progress",
+            attachments: [],
+            createdAt: new Date().toISOString(),
+          },
+        ]);
+      } catch (e) {
+        console.error(e);
+        toast.error("Could not load complaints");
+      }
+    };
+    load();
+  }, []);
 
-  const handleLogout = () => navigate("/login");
-  const handleView = (comp) => alert(`Viewing details for ${comp.subject}`);
+  const filtered = complaints.filter((c) => {
+    if (filter !== "All" && c.status.toLowerCase() !== filter.toLowerCase()) return false;
+    if (query && !(`${c.subject} ${c.category} ${c.id}`.toLowerCase().includes(query.toLowerCase()))) return false;
+    return true;
+  });
+
+  // handlers that navigate to routes — change these paths anytime
+  const handleViewNavigate = (c) => navigate(`/students/complaint`);
+  const handleSurveyNavigate = (c) => navigate(`/students/survey`);
 
   return (
-    <div className="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-      {/* Navigation Bar */}
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 pb-24">
+      <ToastContainer />
       <nav className="bg-white shadow sticky top-0 z-20">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-14 md:h-16">
-            <div className="flex items-center gap-2">
-              <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16" />
-              </svg>
-              <span className="ml-1 text-lg md:text-xl font-bold text-gray-800">Hostel Grievance System</span>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span className="hidden sm:inline text-gray-700 font-medium">Welcome, Student</span>
-              <button onClick={handleLogout} className="bg-red-500 hover:bg-red-600 text-white px-3 py-1.5 rounded-md text-sm">
-                Logout
-              </button>
+        <div className="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <img src={user.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover border" />
+            <div>
+              <div className="font-bold">{user.name}</div>
+              <div className="text-xs text-gray-500">{user.hostel} • {user.room}</div>
             </div>
           </div>
-        </div>
-      </nav>
 
-      {/* Main */}
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-1">Student Dashboard</h1>
-          <p className="text-sm text-gray-600">Manage and track your hostel complaints</p>
-        </div>
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:block">
+              <input
+                placeholder="Search complaints..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="px-3 py-2 border rounded-lg w-64"
+              />
+            </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-          <StatCard title="Total" value={stats.total} colorKey="blue" iconPath="M9 12h6m-6 4h6" />
-          <StatCard title="Pending" value={stats.pending} colorKey="yellow" iconPath="M12 8v4l3 3" />
-          <StatCard title="Resolved" value={stats.resolved} colorKey="green" iconPath="M9 12l2 2 4-4" />
-          <StatCard title="Rejected" value={stats.rejected} colorKey="red" iconPath="M10 14l2-2" />
-        </div>
-
-        {/* Actions & Filters */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-          <div className="flex gap-2">
-            {["All", "Pending", "Resolved", "Rejected"].map((option) => (
-              <button
-                key={option}
-                onClick={() => setFilter(option)}
-                className={`px-3 py-2 rounded-lg text-sm font-medium ${
-                  filter === option ? "bg-indigo-600 text-white shadow" : "bg-white text-gray-700 border border-gray-200"
-                }`}
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex justify-end">
             <button
-              onClick={() => navigate("/complaintform")}
-              className="inline-flex items-center bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold px-3 py-2 rounded-lg hover:from-blue-700 hover:to-indigo-700 text-sm"
+              onClick={() => navigate(`/students/complaintform`)}
+              className="bg-gradient-to-r from-indigo-600 to-blue-500 text-white px-3 py-2 rounded-lg shadow"
             >
-              <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
-              </svg>
               Raise Complaint
             </button>
           </div>
         </div>
+      </nav>
 
-        {/* Desktop table (hidden on small screens) */}
-        <div className="hidden md:block bg-white rounded-lg shadow overflow-hidden">
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-3">
-            <h2 className="text-white font-semibold">{filter === "All" ? "All Complaints" : `${filter} Complaints`}</h2>
-          </div>
+      <main className="max-w-4xl mx-auto px-4 py-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+          <StatCard title="Total" value={complaints.length} className="bg-gradient-to-br from-pink-50 to-pink-100" />
+          <StatCard
+            title="Pending / In Progress"
+            value={complaints.filter((c) => ["pending", "in progress"].includes(c.status.toLowerCase())).length}
+            className="bg-gradient-to-br from-yellow-50 to-yellow-100"
+          />
+          <StatCard title="Resolved" value={complaints.filter((c) => c.status.toLowerCase() === "resolved").length} className="bg-gradient-to-br from-green-50 to-green-100" />
+        </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full table-auto">
-              <thead className="bg-gray-50">
-                <tr>
-                  {["ID", "Category", "Subject", "Date", "Status", "Action"].map((h) => (
-                    <th key={h} className="px-3 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredComplaints.length === 0 ? (
-                  <tr>
-                    <td className="p-6 text-center text-gray-500" colSpan={6}>No {filter.toLowerCase()} complaints found.</td>
-                  </tr>
-                ) : (
-                  filteredComplaints.map((c) => <ComplaintRow key={c.id} comp={c} onView={handleView} />)
-                )}
-              </tbody>
-            </table>
+        <div className="mb-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <select value={filter} onChange={(e) => setFilter(e.target.value)} className="p-2 border rounded">
+            {["All", "Pending", "In Progress", "Resolved", "Rejected"].map((o) => (
+              <option key={o}>{o}</option>
+            ))}
+          </select>
+
+          {/* mobile search visible under filters */}
+          <div className="w-full sm:w-auto">
+            <div className="block sm:hidden mt-2">
+              <input
+                placeholder="Search complaints..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="px-3 py-2 border rounded-lg w-full"
+              />
+            </div>
           </div>
         </div>
 
-        {/* Mobile list (visible on small screens) */}
-        <div className="md:hidden mt-3">
-          {filteredComplaints.length === 0 ? (
-            <div className="text-center text-gray-500 py-6">No {filter.toLowerCase()} complaints found.</div>
+        <div className="space-y-3">
+          {filtered.length === 0 ? (
+            <div className="text-center text-gray-500 py-6">No complaints</div>
           ) : (
-            filteredComplaints.map((c) => <ComplaintCard key={c.id} comp={c} onView={handleView} />)
+            filtered.map((c) => (
+              <div key={c._id}>
+                <ComplaintCard c={c} onView={handleViewNavigate} onSurvey={handleSurveyNavigate} />
+              </div>
+            ))
           )}
         </div>
-      </div>
+      </main>
     </div>
   );
 }
